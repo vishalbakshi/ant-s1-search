@@ -1,0 +1,12 @@
+# Local tools and environments
+.tools/
+node_modules/
+
+# Downloaded filing, models, and intermediate files
+cache/
+
+# macOS
+.DS_Store
+
+# Experiments that are not part of the page
+scratch/

@@ -1,0 +1,14 @@
+{
+  "name": "ant-s1-search",
+  "private": true,
+  "type": "module",
+  "description": "Multi-vector (ColBERT) search over Anthropic's S-1 that runs entirely in the browser",
+  "dependencies": {
+    "pdfjs-dist": "4.10.38",
+    "pylate-rs": "1.0.4"
+  },
+  "devDependencies": {
+    "@huggingface/transformers": "^3.7.6",
+    "http-server": "^14.1.1"
+  }
+}
