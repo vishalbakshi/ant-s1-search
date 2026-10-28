@@ -86,7 +86,6 @@
   <div class="bar">
     <button type="button" data-zoom="1" title="TLDRs of the parts only (1)">1</button>
     <button type="button" data-zoom="2" title="Summaries of the parts, TLDRs of their sections (2)">2</button>
-    <button type="button" data-zoom="3" title="One level deeper (3)">3</button>
     <input id="q" type="search" placeholder="Find in the filing… ( / )" autocomplete="off">
   </div>
   <div id="results"></div>
@@ -191,20 +190,23 @@ function fillBody(el) {
     btn.textContent = `the filing's text (${n} paragraph${n > 1 ? 's' : ''}${node.children.length ? ' before its subsections' : ''})`;
     const orig = document.createElement('div');
     orig.className = 'orig'; orig.hidden = true;
-    for (const p of node.paras) {
-      const para = block('p', p);
-      const num = document.createElement('a');
-      num.className = 'pnum'; num.href = pdfHref(S1.paras[p][1]); num.target = '_blank';
-      num.textContent = 'p. ' + S1.paras[p][1];
-      const wrap = document.createElement('div');
-      wrap.append(num, para);
-      orig.appendChild(wrap);
-    }
-    btn.addEventListener('click', () => { orig.hidden = !orig.hidden; btn.classList.toggle('on', !orig.hidden); });
-    // the filing's text goes right under the summary, before the subsections
     sum.after(btn, orig);
+    btn.addEventListener('click', () => { fillOrig(node, orig); orig.hidden = !orig.hidden; btn.classList.toggle('on', !orig.hidden); });
   }
   el.appendChild(body);
+}
+// The filing's paragraphs, built the first time they're shown.
+function fillOrig(node, orig) {
+  if (orig.childElementCount) return;
+  for (const p of node.paras) {
+    const para = block('p', p);
+    const num = document.createElement('a');
+    num.className = 'pnum'; num.href = pdfHref(S1.paras[p][1]); num.target = '_blank';
+    num.textContent = 'p. ' + S1.paras[p][1];
+    const wrap = document.createElement('div');
+    wrap.append(num, para);
+    orig.appendChild(wrap);
+  }
 }
 function toggle(el, open = !el.classList.contains('open')) {
   if (open) fillBody(el);
@@ -232,6 +234,7 @@ function showPara(pid) {
   const el = openTo(OWNER[pid]);
   const btn = el.querySelector(':scope > .body > .orig-toggle');
   const orig = el.querySelector(':scope > .body > .orig');
+  fillOrig(NODES[OWNER[pid]], orig);
   orig.hidden = false; btn.classList.add('on');
   const p = orig.querySelector(`[data-block="${pid}"]`);
   p.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -413,7 +416,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closePops(); return; }
   if (e.target.closest?.('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === '/') { e.preventDefault(); $('q').focus(); return; }
-  if (['1', '2', '3'].includes(e.key)) { zoom(+e.key); return; }
+  if (['1', '2'].includes(e.key)) { zoom(+e.key); return; }
   const key = e.key.toLowerCase();
   if (readonly || !'anhx'.includes(key) || key.length !== 1) return;
   const s = selectionInBlock();

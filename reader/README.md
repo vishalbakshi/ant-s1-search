@@ -6,7 +6,7 @@ A zoomable reader for Anthropic's S-1. Every heading in the filing has a one-sen
 
 | Key | What it does |
 |---|---|
-| 1 / 2 / 3 | Zoom: the parts' TLDRs, then one or two levels of summaries |
+| 1 / 2 | Zoom: the parts' TLDRs, or the parts' summaries |
 | / | Find a word or phrase in the filing |
 | A | Ask Claude about the selected text (cyan) |
 | N | Write a note (navy); in a note's chat, click Ask to send a question along with your notes |
