@@ -1,6 +1,6 @@
 // Build the search index for s1.pdf: split the filing into chunks by section, encode them, and pack sign bits.
 //
-// 1. Read every text item on every page with pdf.js, the same library index.html renders with,
+// 1. Read every text item on every page with pdf.js, the same library search.html renders with,
 //    so the boxes saved here line up with the page in the browser. The font of each line tells
 //    headings from body text (see HEADINGS).
 // 2. Group lines into paragraphs (a paragraph may continue onto the next page) and paragraphs into

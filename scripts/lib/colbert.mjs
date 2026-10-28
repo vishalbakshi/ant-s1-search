@@ -1,5 +1,5 @@
 // Load a PyLate ColBERT model into pylate-rs's WebAssembly build from Node,
-// the same build index.html will use in the browser.
+// the same build search.html will use in the browser.
 import { readFileSync } from "node:fs";
 import { access, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";

@@ -1,9 +1,9 @@
 """Local server for the S-1 reader, with highlight-to-ask.
 
-Serves the repo on http://localhost:8771 (the reader is at /reader/, next to ../s1.pdf) and answers
+Serves the repo on http://localhost:8771 (the reader is /summary.html) and answers
 questions by running the `claude` CLI in print mode, so it uses your Claude Code login (no API key).
 
-    python3 reader/server.py            # then open http://localhost:8771/reader/
+    python3 reader/server.py            # then open http://localhost:8771/summary.html
     CLAUDE_MODEL=sonnet python3 reader/server.py
 
 Asks, notes and highlights are saved in reader/annotations.json as character offsets into a block of
@@ -154,10 +154,6 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path == "/":
-            self.send_response(302)
-            self.send_header("Location", "/reader/")
-            return self.end_headers()
         if self.path == "/api/threads":
             try:
                 return self.send_json(json.load(open(THREADS)))
@@ -224,5 +220,5 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Reading at http://localhost:{PORT}/reader/  (claude: {CLAUDE}{', model ' + MODEL if MODEL else ''})")
+    print(f"Reading at http://localhost:{PORT}/summary.html  (claude: {CLAUDE}{', model ' + MODEL if MODEL else ''})")
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

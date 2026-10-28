@@ -78,7 +78,7 @@
 <body>
 <main>
   <h1 id="docTitle">Anthropic, PBC Form S-1</h1>
-  <p class="meta">Filed with the SEC on October 26, 2026 · <a id="srcLink" href="#">original on EDGAR</a> · <a href="../s1.pdf">PDF</a> · <a href="../">search it</a></p>
+  <p class="meta">Filed with the SEC on October 26, 2026 · <a id="srcLink" href="#">original on EDGAR</a> · <a href="s1.pdf">PDF</a> · <a href="search.html">search it</a></p>
   <p id="rootTldr"></p>
   <p class="summary" id="rootSummary"></p>
   <p class="hint">TLDRs and summaries are written by Claude from the filing. Underlined phrases open the paragraph they came from; solid underlines open a subsection. Check anything that matters against the filing's own text.</p>
@@ -135,7 +135,7 @@ function path(id) {
   return out.join(' › ');
 }
 function subtreeParas(node) { return node.paras.length + node.children.reduce((n, c) => n + subtreeParas(c), 0); }
-const pdfHref = page => `../s1.pdf#page=${page}`;
+const pdfHref = page => `s1.pdf#page=${page}`;
 
 // Block sources: every annotatable piece of text has a key, and its HTML is rebuilt from the key.
 function blockHTML(key) {
@@ -404,7 +404,7 @@ async function loadAnns() {
     readonly = true;
     document.body.classList.add('readonly');
     $('keysHint').textContent = 'This copy is read-only: run reader/server.py locally to ask Claude, take notes and highlight. Esc closes pop-ups.';
-    try { anns = await (await fetch('annotations.json')).json(); } catch { anns = []; }
+    try { anns = await (await fetch('reader/annotations.json')).json(); } catch { anns = []; }
   }
 }
 function save() {
@@ -581,7 +581,7 @@ function md(src) {
 // ---------- boot ----------
 document.querySelectorAll('.bar button').forEach(b => b.onclick = () => zoom(+b.dataset.zoom));
 (async () => {
-  S1 = await (await fetch('s1.json')).json();
+  S1 = await (await fetch('reader/s1.json')).json();
   index(S1.root, null);
   await loadAnns();
   $('srcLink').href = S1.source;

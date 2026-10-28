@@ -22,7 +22,7 @@ The page works as static files (read-only, with my saved annotations). To ask Cl
 python3 reader/server.py
 ```
 
-Then open http://localhost:8771/reader/. Claude gets the section you're reading (its summary and the filing's text) with every question, and can search the web.
+Then open http://localhost:8771/summary.html. Claude gets the section you're reading (its summary and the filing's text) with every question, and can search the web.
 
 ## Rebuild the summaries
 
