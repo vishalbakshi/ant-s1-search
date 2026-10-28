@@ -104,6 +104,15 @@ def heading_ids(node):
         yield from heading_ids(c)
 
 
+def billions(text):
+    """Write dollar amounts in billions as $16.286B: "$16,286 million" and "$1.5 billion" both."""
+    def from_millions(m):
+        n = float(m.group(1).replace(",", ""))
+        return m.group(0) if n < 1000 else f"${n / 1000:,.4f}".rstrip("0").rstrip(".") + "B"
+    text = re.sub(r"\$([\d,]+(?:\.\d+)?) million\b", from_millions, text)
+    return re.sub(r"\$([\d,]+(?:\.\d+)?) billion\b", r"$\1B", text)
+
+
 def clean_links(summary, node):
     """Keep links to the section's own paragraphs and direct subsections; unlink the rest."""
     ok = set(node["paras"]) | {c["id"] for c in node["children"]}
@@ -149,7 +158,8 @@ def main():
     def report(answer, subtree):
         with lock:
             for i in subtree:
-                done[i] = {"tldr": answer[i]["tldr"].strip(), "summary": clean_links(answer[i]["summary"].strip(), nodes[i])}
+                done[i] = {"tldr": billions(answer[i]["tldr"].strip()),
+                           "summary": billions(clean_links(answer[i]["summary"].strip(), nodes[i]))}
             print(f"{len(done)}/{total} sections", file=sys.stderr)
 
     def batch(group):
