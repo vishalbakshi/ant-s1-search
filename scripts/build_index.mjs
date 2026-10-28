@@ -14,6 +14,7 @@
 //
 // Usage: node scripts/build_index.mjs [--workers 6] [--split-only] [--model repo@revision --out dir]
 //   --split-only  stop after step 3 and write the chunk texts to cache/chunks.json
+//   --outline     stop after step 2 and write the sections and their paragraphs to reader/outline.json
 //   --model       encode with another PyLate model instead of the one in model.json
 //   --out         write index.bin and docs.json there instead of data/
 // The float32 vectors are also kept in cache/embeddings/, for comparing models and precisions.
@@ -219,6 +220,16 @@ function chunkSection(section) {
   return chunks;
 }
 
+// Sections with their whole paragraphs, for the reader: [{ headings, level, page, paragraphs: [{ text, page }] }].
+function outline(found) {
+  return found.map((s) => ({
+    headings: s.headings,
+    level: s.heading?.level ?? 0,
+    page: (s.heading ?? s.paragraphs[0]).lines[0].page,
+    paragraphs: s.paragraphs.map((p) => ({ text: paragraphText(p.lines).text, page: p.lines[0].page })),
+  }));
+}
+
 function chunkText(chunk) {
   const body = chunk.pieces.reduce((t, p) => (!t ? p.text : `${t}${p.starts ? "\n" : " "}${p.text}`), "");
   return chunk.prefix ? `${chunk.prefix}\n${body}` : body;
@@ -239,6 +250,7 @@ async function extract() {
     lines.push(...pageLines(p - 1, items, fonts, height));
   }
   const found = sections(paragraphs(lines));
+  if (process.argv.includes("--outline")) return { outline: outline(found) };
   const chunks = found
     .flatMap((s, section) => chunkSection(s).map((c) => ({ ...c, section })))
     .filter((c) => c.pieces.map((p) => p.text).join("").replace(/[^A-Za-z]/g, "").length >= 20); // stray labels and numbers
@@ -280,7 +292,13 @@ async function main() {
   const model = repo ? { repo, revision } : MODEL;
   const out = option("--out") ? join(ROOT, option("--out")) : join(ROOT, "data");
 
-  let { pages, chunks, sections: sectionHeadings } = await extract();
+  const extracted = await extract();
+  if (extracted.outline) {
+    await writeFile(join(ROOT, "reader", "outline.json"), JSON.stringify(extracted.outline));
+    console.error(`Wrote reader/outline.json: ${extracted.outline.length} sections`);
+    return;
+  }
+  let { pages, chunks, sections: sectionHeadings } = extracted;
   console.error(`${pages.length} pages, ${chunks.length} chunks`);
   if (args.includes("--split-only")) {
     await mkdir(join(ROOT, "cache"), { recursive: true });

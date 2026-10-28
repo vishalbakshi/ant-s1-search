@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "reader",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["reader/server.py"],
+      "port": 8771
+    }
+  ]
+}

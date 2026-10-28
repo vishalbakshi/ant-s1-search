@@ -10,3 +10,8 @@ cache/
 
 # Experiments that are not part of the page
 scratch/
+
+# The reader's claude call cache and log
+reader/build/
+reader/build.log
+reader/outline.json

@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-1 Reader</title>
+<style>
+  body { margin: 0; background: #fff; color: #000; font-family: serif; line-height: 1.4; }
+  h1, .title, .hint, .bar, .pg, .meta, button, input { font-family: sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 160px; }
+  h1 { margin: 0 0 4px; font-size: 26px; }
+  .meta { font-size: 13px; margin: 0 0 16px; }
+  .meta a, .pg { color: #000; }
+  .hint { font-size: 13px; }
+  #rootTldr { font-size: 20px; margin: 16px 0 8px; }
+  .bar { position: sticky; top: 0; z-index: 5; background: #fff; display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid #000; margin: 16px 0; }
+  .bar button { width: 36px; height: 32px; padding: 0; border: 1px solid #000; background: #fff; color: #000; cursor: pointer; }
+  .bar button.on { background: #000; color: #fff; }
+  .bar input { flex: 1; min-width: 0; height: 30px; padding: 0 8px; border: 1px solid #000; font-size: 14px; }
+  #results { margin: 0 0 24px; }
+  #results:empty { display: none; }
+  .hit { padding: 6px 0; border-bottom: 1px solid #ddd; cursor: pointer; }
+  .hit .where { font-family: sans-serif; font-size: 12px; }
+  .hit b { background: #ffd300; font-weight: normal; }
+
+  .node { margin: 0; }
+  .node > .row { display: grid; grid-template-columns: 18px 1fr auto; column-gap: 4px; padding: 6px 0; cursor: pointer; }
+  .node > .row:hover .title { text-decoration: underline; }
+  .tw { font-family: sans-serif; font-size: 12px; padding-top: 3px; user-select: none; }
+  .title { font-weight: bold; font-size: 15px; }
+  .pg { font-size: 12px; padding-top: 3px; }
+  .tldr { grid-column: 2 / 4; }
+  .node > .body { margin-left: 18px; padding-left: 12px; border-left: 1px solid #000; }
+  .node.open > .row .tldr { display: none; }   /* the summary takes over */
+  .node:not(.open) > .body { display: none; }
+  .summary { margin: 4px 0 12px; }
+  .summary .lead { display: block; font-style: italic; margin-bottom: 6px; }
+  .orig-toggle { font-family: sans-serif; font-size: 12px; border: 1px solid #000; background: #fff; color: #000; padding: 2px 6px; cursor: pointer; margin: 4px 0 12px; }
+  .orig-toggle.on { background: #000; color: #fff; }
+  .orig { margin: 0 0 12px; padding: 4px 12px; background: #f5efe0; }
+  .orig p { margin: 8px 0; }
+  .orig .pnum { font-family: sans-serif; font-size: 11px; float: right; margin-left: 8px; color: #000; }
+  .flash { animation: flash 2s ease-out; }
+  @keyframes flash { from { background: #00e5ff; } to { background: transparent; } }
+
+  a.ln { color: inherit; text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 3px; cursor: pointer; }
+  a.ln.sec { text-decoration-style: solid; }
+  a.ln:hover, a.ln.active { background: #b4b8ff; }
+
+  mark.hl { background: #ffd300; color: #000; }
+  mark.ask { background: #00e5ff; color: #000; cursor: pointer; }
+  mark.note { background: #1f2a6e; color: #fff; cursor: pointer; }
+  mark.active { outline: 1px solid #000; }
+
+  .pop { position: absolute; z-index: 20; display: none; flex-direction: column; background: #fff; border: 1px solid #000; width: min(480px, calc(100vw - 32px)); max-height: min(70vh, 560px); }
+  .pop.open { display: flex; }
+  .pop-head { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px; font-family: sans-serif; font-size: 12px; border-bottom: 1px solid #000; }
+  .pop-head .where { flex: 1; }
+  .pop-head button { border: 0; background: none; cursor: pointer; padding: 0 2px; font-size: 14px; }
+  .pop-body { overflow-y: auto; padding: 8px; }
+  .pop-body p { margin: 0 0 8px; }
+  .pop-foot { padding: 6px 8px; border-top: 1px solid #000; font-family: sans-serif; font-size: 12px; display: flex; gap: 12px; }
+  .pop-foot a { color: #000; cursor: pointer; text-decoration: underline; }
+  #tip { z-index: 30; width: min(420px, calc(100vw - 32px)); }
+  .tip-quote { flex: 1; padding: 8px; font-style: italic; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .tip-msgs { flex: 1; overflow-y: auto; padding: 0 8px; }
+  .msg.user { font-weight: bold; margin-top: 8px; }
+  .msg.note { margin-top: 8px; padding-left: 6px; border-left: 2px solid #1f2a6e; }
+  .tip-input { display: flex; padding: 8px; }
+  .tip-input textarea { flex: 1; resize: none; font: inherit; }
+  #tipAsk { margin-left: 8px; border: 1px solid #000; background: #fff; color: #000; cursor: pointer; }
+  #tipAsk.on { background: #000; color: #fff; }
+  #tipDelete svg { display: block; width: 16px; height: 16px; }
+  body.readonly .tip-input { display: none; }
+  @media (max-width: 600px) { .bar .wide { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="docTitle">Anthropic, PBC Form S-1</h1>
+  <p class="meta">Filed with the SEC on October 26, 2026 · <a id="srcLink" href="#">original on EDGAR</a> · <a href="../s1.pdf">PDF</a> · <a href="../">search it</a></p>
+  <p id="rootTldr"></p>
+  <p class="summary" id="rootSummary"></p>
+  <p class="hint">TLDRs and summaries are written by Claude from the filing. Underlined phrases open the paragraph they came from; solid underlines open a subsection. Check anything that matters against the filing's own text.</p>
+
+  <div class="bar">
+    <button type="button" data-zoom="1" title="TLDRs of the parts only (1)">1</button>
+    <button type="button" data-zoom="2" title="Summaries of the parts, TLDRs of their sections (2)">2</button>
+    <button type="button" data-zoom="3" title="One level deeper (3)">3</button>
+    <input id="q" type="search" placeholder="Find in the filing… ( / )" autocomplete="off">
+  </div>
+  <div id="results"></div>
+  <div id="outline"><p class="hint">Loading the filing…</p></div>
+  <p class="hint" id="keysHint">Select text, then press A to ask Claude about it, N to write a note, H to highlight, X to clear marks. Esc closes pop-ups.</p>
+</main>
+
+<div class="pop" id="peek" role="dialog" aria-label="Original paragraph">
+  <div class="pop-head"><span class="where" id="peekWhere"></span><button type="button" id="peekClose" aria-label="Close">✕</button></div>
+  <div class="pop-body" id="peekBody"></div>
+  <div class="pop-foot"><a id="peekContext">show in context</a><a id="peekPdf" target="_blank">open page in PDF</a></div>
+</div>
+
+<div class="pop" id="tip" role="dialog" aria-label="Ask about this passage">
+  <div class="pop-head" style="border:0;padding:0">
+    <div class="tip-quote" id="tipQuote"></div>
+    <button id="tipDelete" type="button" title="Delete this chat" aria-label="Delete this chat" style="margin:6px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>
+    </button>
+  </div>
+  <div class="tip-msgs" id="tipMsgs"></div>
+  <form class="tip-input" id="tipForm">
+    <textarea id="tipText" rows="1" placeholder="Ask about this passage… (Enter to send, Esc to close)"></textarea>
+    <button type="button" id="tipAsk" title="Ask Claude about this passage and your notes on it">Ask</button>
+  </form>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const outline = $('outline'), peek = $('peek'), tip = $('tip');
+let S1, NODES = {}, PARENT = {}, OWNER = {};
+let anns = [];            // {id, kind: 'ask'|'note'|'highlight', block, start, end, messages?, created}
+let readonly = false;
+let pending = null;       // selection waiting for its first message: {kind, block, start, end, quote, rect}
+let active = null;        // annotation shown in the tip
+let busy = false, asking = false;
+
+// ---------- the tree ----------
+function index(node, parent) {
+  NODES[node.id] = node; PARENT[node.id] = parent;
+  node.paras.forEach(p => OWNER[p] = node.id);
+  node.children.forEach(c => index(c, node.id));
+}
+function path(id) {
+  const out = [];
+  for (let n = id; n && n !== 'root'; n = PARENT[n]) out.unshift(NODES[n].title);
+  return out.join(' › ');
+}
+function subtreeParas(node) { return node.paras.length + node.children.reduce((n, c) => n + subtreeParas(c), 0); }
+const pdfHref = page => `../s1.pdf#page=${page}`;
+
+// Block sources: every annotatable piece of text has a key, and its HTML is rebuilt from the key.
+function blockHTML(key) {
+  if (key.startsWith('p')) return esc(S1.paras[key][0]);
+  const [id, part] = key.split('.');
+  const n = NODES[id];
+  if (part === 'tldr') return esc(n.tldr || '');
+  return esc(n.summary || '').replace(/\[\[(.+?)\|([ps]\d+)\]\]/g,
+    (_, text, ref) => `<a class="ln${ref[0] === 's' ? ' sec' : ''}" data-ref="${ref}">${text}</a>`);
+}
+function block(tag, key, cls) {
+  const el = document.createElement(tag);
+  el.dataset.block = key;
+  if (cls) el.className = cls;
+  el.innerHTML = blockHTML(key);
+  paint(el);
+  return el;
+}
+
+function nodeEl(node, depth) {
+  const el = document.createElement('section');
+  el.className = 'node'; el.dataset.id = node.id; el.dataset.depth = depth;
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<span class="tw">▸</span><span class="title">${esc(node.title)}</span>` +
+    `<a class="pg" href="${pdfHref(node.page)}" target="_blank" title="Open this page of the PDF">p. ${node.page}</a>`;
+  row.appendChild(block('div', node.id + '.tldr', 'tldr'));
+  row.addEventListener('click', e => {
+    if (e.target.closest('a, mark') || window.getSelection().toString()) return;
+    toggle(el);
+  });
+  el.appendChild(row);
+  return el;
+}
+
+function fillBody(el) {
+  if (el.querySelector(':scope > .body')) return;
+  const node = NODES[el.dataset.id], depth = +el.dataset.depth;
+  const body = document.createElement('div');
+  body.className = 'body';
+  const sum = block('p', node.id + '.sum', 'summary');
+  const lead = document.createElement('span');
+  lead.className = 'lead';
+  lead.appendChild(block('span', node.id + '.tldr'));
+  sum.before(lead);
+  body.append(lead, sum);
+  for (const c of node.children) body.appendChild(nodeEl(c, depth + 1));
+  if (node.paras.length) {
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'orig-toggle';
+    const n = node.paras.length;
+    btn.textContent = `the filing's text (${n} paragraph${n > 1 ? 's' : ''}${node.children.length ? ' before its subsections' : ''})`;
+    const orig = document.createElement('div');
+    orig.className = 'orig'; orig.hidden = true;
+    for (const p of node.paras) {
+      const para = block('p', p);
+      const num = document.createElement('a');
+      num.className = 'pnum'; num.href = pdfHref(S1.paras[p][1]); num.target = '_blank';
+      num.textContent = 'p. ' + S1.paras[p][1];
+      const wrap = document.createElement('div');
+      wrap.append(num, para);
+      orig.appendChild(wrap);
+    }
+    btn.addEventListener('click', () => { orig.hidden = !orig.hidden; btn.classList.toggle('on', !orig.hidden); });
+    // the filing's text goes right under the summary, before the subsections
+    sum.after(btn, orig);
+  }
+  el.appendChild(body);
+}
+function toggle(el, open = !el.classList.contains('open')) {
+  if (open) fillBody(el);
+  el.classList.toggle('open', open);
+  el.querySelector(':scope > .row .tw').textContent = open ? '▾' : '▸';
+}
+function nodeElOf(id) { return outline.querySelector(`.node[data-id="${id}"]`); }
+// Open every section from the top down to id, and return its element.
+function openTo(id) {
+  const chain = [];
+  for (let n = id; n && n !== 'root'; n = PARENT[n]) chain.unshift(n);
+  let el = null;
+  for (const n of chain) { el = nodeElOf(n); toggle(el, true); }
+  return el;
+}
+function flash(el) {
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+function showSection(id) {
+  const el = openTo(id);
+  el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  flash(el.querySelector(':scope > .row'));
+}
+function showPara(pid) {
+  const el = openTo(OWNER[pid]);
+  const btn = el.querySelector(':scope > .body > .orig-toggle');
+  const orig = el.querySelector(':scope > .body > .orig');
+  orig.hidden = false; btn.classList.add('on');
+  const p = orig.querySelector(`[data-block="${pid}"]`);
+  p.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  flash(p);
+}
+function zoom(level) {
+  closePops();
+  outline.querySelectorAll('.node').forEach(el => toggle(el, +el.dataset.depth < level));
+  document.querySelectorAll('.bar button').forEach(b => b.classList.toggle('on', +b.dataset.zoom === level));
+}
+
+// ---------- linked phrases ----------
+document.addEventListener('click', e => {
+  const a = e.target.closest('a.ln');
+  if (!a || window.getSelection().toString()) return;
+  e.preventDefault();
+  const ref = a.dataset.ref;
+  if (ref[0] === 's') { closePops(); showSection(ref); return; }
+  openPeek(ref, a);
+});
+function openPeek(pid, anchor) {
+  closeTip();
+  document.querySelectorAll('a.ln.active').forEach(x => x.classList.remove('active'));
+  anchor.classList.add('active');
+  const [, page] = S1.paras[pid];
+  $('peekWhere').textContent = `${path(OWNER[pid])} · p. ${page}`;
+  // a paragraph that leads into a list ("…depends on our ability to:") comes with its bullets
+  const shown = [pid], own = NODES[OWNER[pid]].paras;
+  if (/:\s*$/.test(S1.paras[pid][0]))
+    for (let i = own.indexOf(pid) + 1; i < own.length && /^[•●▪]/.test(S1.paras[own[i]][0]); i++) shown.push(own[i]);
+  $('peekBody').replaceChildren(...shown.map(p => block('p', p)));
+  $('peekPdf').href = pdfHref(page);
+  $('peekContext').onclick = () => { closePops(); showPara(pid); };
+  place(peek, anchor.getBoundingClientRect());
+}
+function place(pop, rect) {
+  pop.classList.add('open');
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  let left = Math.min(Math.max(8, rect.left), innerWidth - w - 8);
+  let top = rect.bottom + 6;
+  if (top + h > innerHeight - 8 && rect.top - h - 6 > 8) top = rect.top - h - 6;
+  pop.style.left = left + scrollX + 'px'; pop.style.top = top + scrollY + 'px';
+}
+$('peekClose').onclick = () => closePops();
+function closePeek() {
+  peek.classList.remove('open');
+  document.querySelectorAll('a.ln.active').forEach(x => x.classList.remove('active'));
+}
+function closePops() { closePeek(); closeTip(); }
+document.addEventListener('mousedown', e => {
+  if (!e.target.closest('.pop, a.ln, mark.ask, mark.note')) closePops();
+});
+
+// ---------- search ----------
+let searchTimer;
+$('q').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(search, 150); });
+$('q').addEventListener('keydown', e => { if (e.key === 'Escape') { $('q').value = ''; search(); $('q').blur(); } });
+function search() {
+  const q = $('q').value.trim();
+  const out = $('results');
+  out.replaceChildren();
+  if (q.length < 3) return;
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  const hits = [];
+  for (const n of Object.values(NODES)) {
+    if (n.id === 'root') continue;
+    const text = [n.title, n.tldr, (n.summary || '').replace(/\[\[(.+?)\|[ps]\d+\]\]/g, '$1')].join(' — ');
+    if (re.test(text)) hits.push({ kind: 'sec', id: n.id, text });
+    re.lastIndex = 0;
+  }
+  const paraHits = [];
+  for (const [pid, [text]] of Object.entries(S1.paras)) {
+    if (re.test(text)) paraHits.push({ kind: 'para', id: pid, text });
+    re.lastIndex = 0;
+  }
+  const head = document.createElement('p');
+  head.className = 'hint';
+  head.textContent = `${hits.length} section${hits.length === 1 ? '' : 's'} and ${paraHits.length} paragraph${paraHits.length === 1 ? '' : 's'} of the filing mention “${q}”` + (hits.length + paraHits.length > 60 ? ' (showing the first 60)' : '');
+  out.appendChild(head);
+  for (const h of [...hits, ...paraHits].slice(0, 60)) {
+    const el = document.createElement('div');
+    el.className = 'hit';
+    const at = h.text.search(re); re.lastIndex = 0;
+    const from = Math.max(0, at - 90);
+    const snip = (from ? '…' : '') + h.text.slice(from, at + 160) + (at + 160 < h.text.length ? '…' : '');
+    const where = h.kind === 'sec' ? `section · ${path(h.id)}` : `filing text · ${path(OWNER[h.id])} · p. ${S1.paras[h.id][1]}`;
+    el.innerHTML = `<div class="where">${esc(where)}</div><div>${esc(snip).replace(re, m => `<b>${m}</b>`)}</div>`;
+    el.onclick = () => h.kind === 'sec' ? showSection(h.id) : showPara(h.id);
+    out.appendChild(el);
+  }
+}
+
+// ---------- marks ----------
+// Offsets count characters of the block's text.
+function textNodes(el) {
+  const out = [];
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  while (walk.nextNode()) out.push(walk.currentNode);
+  return out;
+}
+function wrap(el, start, end, ann) {
+  let at = 0;
+  for (const t of textNodes(el)) {
+    const len = t.data.length, s = Math.max(start, at), e = Math.min(end, at + len);
+    if (s < e) {
+      let node = t;
+      if (e < at + len) node.splitText(e - at);
+      if (s > at) node = node.splitText(s - at);
+      const m = document.createElement('mark');
+      m.className = { highlight: 'hl', ask: 'ask', note: 'note' }[ann.kind];
+      m.dataset.ann = ann.id;
+      node.replaceWith(m); m.appendChild(node);
+    }
+    at += len;
+  }
+}
+function paint(el) {
+  // highlights first, so asks and notes draw over them
+  const mine = anns.filter(a => a.block === el.dataset.block).sort((a, b) => (a.kind === 'highlight' ? 0 : 1) - (b.kind === 'highlight' ? 0 : 1));
+  for (const a of mine) wrap(el, a.start, a.end, a);
+}
+function repaint(key) {
+  document.querySelectorAll(`[data-block="${key}"]`).forEach(el => { el.innerHTML = blockHTML(key); paint(el); });
+  if (active) setActive(active.id);
+}
+function blockText(key) {
+  const el = document.createElement('div');
+  el.innerHTML = blockHTML(key);
+  return el.textContent;
+}
+function quoteOf(a) { return blockText(a.block).slice(a.start, a.end); }
+
+function selectionInBlock() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount || sel.isCollapsed) return null;
+  const range = sel.getRangeAt(0);
+  const el = (range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement).closest('[data-block]');
+  if (!el) return null;
+  // ranges can end on an element; measure with a range from the block's start instead
+  const pre = document.createRange();
+  pre.selectNodeContents(el);
+  pre.setEnd(range.startContainer, range.startOffset);
+  const start = textBefore(el, pre);
+  pre.setEnd(range.endContainer, range.endOffset);
+  const end = textBefore(el, pre);
+  if (end <= start) return null;
+  return { block: el.dataset.block, start, end, quote: blockText(el.dataset.block).slice(start, end), rect: range.getBoundingClientRect() };
+}
+function textBefore(el, range) {
+  let n = 0;
+  for (const t of textNodes(el)) {
+    if (!range.intersectsNode(t)) continue;
+    if (t === range.endContainer) { n += range.endOffset; break; }
+    n += t.data.length;
+  }
+  return n;
+}
+
+// ---------- annotations ----------
+async function loadAnns() {
+  try {
+    const r = await fetch('/api/threads');
+    if (!r.ok) throw 0;
+    anns = await r.json();
+  } catch {
+    // static copy (GitHub Pages): show the saved annotations, read-only
+    readonly = true;
+    document.body.classList.add('readonly');
+    $('keysHint').textContent = 'This copy is read-only: run reader/server.py locally to ask Claude, take notes and highlight. Esc closes pop-ups.';
+    try { anns = await (await fetch('annotations.json')).json(); } catch { anns = []; }
+  }
+}
+function save() {
+  if (readonly) return;
+  fetch('/api/threads', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(anns) });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closePops(); return; }
+  if (e.target.closest?.('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === '/') { e.preventDefault(); $('q').focus(); return; }
+  if (['1', '2', '3'].includes(e.key)) { zoom(+e.key); return; }
+  const key = e.key.toLowerCase();
+  if (readonly || !'anhx'.includes(key) || key.length !== 1) return;
+  const s = selectionInBlock();
+  if (!s) return;
+  e.preventDefault();
+  if (key === 'x') {
+    const gone = anns.filter(a => a.block === s.block && a.start < s.end && a.end > s.start);
+    if (!gone.length) return;
+    anns = anns.filter(a => !gone.includes(a));
+    window.getSelection().removeAllRanges();
+    repaint(s.block); save(); closeTip();
+    return;
+  }
+  if (key === 'h') {
+    anns.push({ id: newId(), kind: 'highlight', block: s.block, start: s.start, end: s.end, created: new Date().toISOString() });
+    window.getSelection().removeAllRanges();
+    repaint(s.block); save();
+    return;
+  }
+  // a or n: open the tip; the annotation is saved with its first message
+  pending = { ...s, kind: key === 'a' ? 'ask' : 'note' };
+  active = null; asking = false;
+  openTip(s.rect, s.quote, []);
+});
+const newId = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+document.addEventListener('click', e => {
+  const m = e.target.closest('mark.ask, mark.note');
+  if (!m || window.getSelection().toString()) return;
+  const a = anns.find(x => x.id === m.dataset.ann);
+  if (!a) return;
+  e.stopPropagation();
+  pending = null; active = a; asking = false;
+  setActive(a.id);
+  const marks = [...document.querySelectorAll(`mark[data-ann="${a.id}"]`)].filter(x => x.closest('#tip') === null);
+  openTip(marks.at(-1).getBoundingClientRect(), quoteOf(a), a.messages || []);
+}, true);
+
+function setActive(id) {
+  document.querySelectorAll('mark.active').forEach(m => m.classList.remove('active'));
+  if (id) document.querySelectorAll(`mark[data-ann="${id}"]`).forEach(m => m.classList.add('active'));
+}
+function tipMode() {
+  const kind = active?.kind || pending?.kind;
+  $('tipAsk').style.display = kind === 'note' ? '' : 'none';
+  $('tipAsk').classList.toggle('on', asking);
+  $('tipText').placeholder = kind === 'note' && !asking ? 'Write a note… (Enter to save, Esc to close)' : 'Ask about this passage… (Enter to send, Esc to close)';
+}
+function openTip(rect, quote, messages) {
+  closePeek();
+  $('tipQuote').textContent = quote;
+  $('tipMsgs').replaceChildren();
+  for (const m of messages) addMsg(m.role, m.content);
+  $('tipDelete').style.display = active ? '' : 'none';
+  tipMode();
+  place(tip, rect);
+  $('tipMsgs').scrollTop = $('tipMsgs').scrollHeight;
+  if (!readonly) $('tipText').focus({ preventScroll: true });
+}
+function closeTip() {
+  tip.classList.remove('open');
+  pending = null; active = null; asking = false;
+  setActive(null);
+}
+$('tipDelete').onclick = () => {
+  if (!active || !confirm('Delete this chat?')) return;
+  const key = active.block;
+  anns = anns.filter(a => a !== active);
+  closeTip(); repaint(key); save();
+};
+$('tipAsk').onclick = () => { asking = !asking; tipMode(); $('tipText').focus(); };
+function autosize() { const t = $('tipText'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 140) + 'px'; }
+$('tipText').addEventListener('input', autosize);
+$('tipText').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('tipForm').requestSubmit(); }
+  if (e.key === 'Escape') closePops();
+});
+function addMsg(role, content) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.innerHTML = role === 'assistant' ? md(content) : esc(content);
+  $('tipMsgs').appendChild(el);
+  return el;
+}
+
+$('tipForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const q = $('tipText').value.trim();
+  if (!q || busy) return;
+  if (!active) {
+    active = { id: newId(), kind: pending.kind, block: pending.block, start: pending.start, end: pending.end, messages: [], created: new Date().toISOString() };
+    anns.push(active);
+    pending = null;
+    window.getSelection().removeAllRanges();
+    repaint(active.block);
+    $('tipDelete').style.display = '';
+  }
+  const ann = active;
+  $('tipText').value = ''; autosize();
+  if (ann.kind === 'note' && !asking) {
+    ann.messages.push({ role: 'note', content: q });
+    addMsg('note', q);
+    $('tipMsgs').scrollTop = $('tipMsgs').scrollHeight;
+    save();
+    return;
+  }
+  ann.messages.push({ role: 'user', content: q });
+  addMsg('user', q);
+  const out = addMsg('assistant', '…');
+  $('tipMsgs').scrollTop = $('tipMsgs').scrollHeight;
+  busy = true;
+  save();
+  let text = '';
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ block: ann.block, quote: quoteOf(ann), messages: ann.messages })
+    });
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      text += dec.decode(value, { stream: true });
+      if (active === ann) {
+        const box = $('tipMsgs');
+        const stick = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+        out.innerHTML = md(text);
+        if (stick) box.scrollTop = box.scrollHeight;
+      }
+    }
+  } catch (err) {
+    text += `\n\n**Couldn't reach the local server.** Is \`python3 reader/server.py\` still running? (${err.message})`;
+    out.innerHTML = md(text);
+  }
+  ann.messages.push({ role: 'assistant', content: text.trim() });
+  busy = false;
+  save();
+  if (active === ann && ann.kind === 'note') { asking = false; tipMode(); }
+  if (active === ann) $('tipText').focus({ preventScroll: true });
+});
+
+// ---------- tiny markdown ----------
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function inline(s) {
+  return esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+}
+function md(src) {
+  const out = [];
+  for (const para of src.replace(/\r/g, '').split(/\n{2,}/)) {
+    const lines = para.split('\n').filter(l => l.trim());
+    if (!lines.length) continue;
+    if (lines.every(l => /^\s*[-*•]\s+/.test(l))) out.push('<ul>' + lines.map(l => '<li>' + inline(l.replace(/^\s*[-*•]\s+/, '')) + '</li>').join('') + '</ul>');
+    else out.push('<p>' + lines.map(l => inline(l.replace(/^#+\s*/, ''))).join('<br>') + '</p>');
+  }
+  return out.join('');
+}
+
+// ---------- boot ----------
+document.querySelectorAll('.bar button').forEach(b => b.onclick = () => zoom(+b.dataset.zoom));
+(async () => {
+  S1 = await (await fetch('s1.json')).json();
+  index(S1.root, null);
+  await loadAnns();
+  $('srcLink').href = S1.source;
+  $('rootTldr').replaceChildren(block('span', 'root.tldr'));
+  $('rootSummary').replaceWith(Object.assign(block('p', 'root.sum', 'summary'), { id: 'rootSummary' }));
+  outline.replaceChildren(...S1.root.children.map(part => nodeEl(part, 1)));
+  zoom(1);
+})();
+</script>
+</body>
+</html>
