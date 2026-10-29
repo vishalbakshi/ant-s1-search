@@ -82,11 +82,7 @@
   </div>
 </div>
 <script type="module">
-import init, { ColBERT } from 'https://cdn.jsdelivr.net/npm/pylate-rs@1.0.4/pylate_rs.js';
-import { lookupTables, tokenScores } from '../../scorer.js';
-import { ourVoice } from '../../query.js';
-import { bm25 } from '../../fts.js';
-import { rerank, rrf, vectorStore } from '../../hybrid.js';
+import { prepare, load, search as runSearch, mark, snippet, HAY, PSEC } from './search.js';
 const $ = id => document.getElementById(id);
 let S1, THREADS, PUBLIC = {}, PARATLDR = {}, NODES = {}, PARENT = {}, DEPTH = {}, ORDER = [];
 const open = new Set();
@@ -156,202 +152,22 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------- search ----------
-// Hybrid search with rerank, as on the hosted search page: ColBERT and BM25 each rank the documents,
-// reciprocal rank fusion merges the lists, and the top RERANK are reranked by exact MaxSim on their
-// full vectors. The documents are paragraphs, each twice (build_search.mjs): the filing's text, searched
-// with the query in the filing's voice ("we"), and the sentence written for it, searched with the query
-// as typed (the sentences say "Anthropic"). Numbers in the query add a third list, matched by value
-// across units, so "$16B" finds "16,286" in a table given in millions. The best TOP paragraphs match;
-// a section's badge is its best paragraph's rank.
-const FUSE_DEPTH = 100, RERANK = 50, TOP = 15;
-const MODEL_FILES = ['model.safetensors', '1_Dense/model.safetensors', 'tokenizer.json', 'config.json',
-  'config_sentence_transformers.json', '1_Dense/config.json', 'special_tokens_map.json'];
-let Q = null, ENGINE = null;
-const HAY = {}, PSEC = {}, VALS = {};
-const STOP = new Set(('a an and are as at be been but by can could did do does for from had has have how i if in into is it its ' +
-  'me my no not of on or our out so than that the their them then there these they this those to too up us was we were what ' +
-  'when where which while who whom why will with would you your about any much many more most should just also very').split(' '));
-const UNITS = { thousand: 1e3, million: 1e6, billion: 1e9, trillion: 1e12, b: 1e9, m: 1e6 };
-const NUM = /(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(%|thousand|million|billion|trillion|B\b|M\b)?/gi;
-const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-function prepSearch() {
-  for (const id of ORDER) for (const p of NODES[id].paras) {
-    PSEC[p] = id;
-    HAY[p] = { s: PARATLDR[id]?.paras?.[p] || '', t: S1.paras[p][0] };
-  }
-}
-// a number the query asks about, or null when it is a year or a small count (searched as a word instead)
-function claim(m) {
-  const whole = m[1], frac = m[2] || '', unit = (m[3] || '').toLowerCase();
-  const v = parseFloat(whole.replace(/,/g, '') + frac);
-  if (unit !== '%' && !frac && (v < 10 || (v >= 1900 && v <= 2100))) return null;
-  const scale = UNITS[unit] || 1;
-  return { v: v * scale, tol: frac ? 0.5 * 10 ** -(frac.length - 1) * scale : scale > 1 ? 0.5 * scale : 0, pct: unit === '%', unitless: !unit };
-}
-// every value a text could mean: as written, and scaled the way a table in thousands, millions or billions would be
-function values(text) {
-  const vals = [], pcts = [], raw = [];
-  for (const m of text.matchAll(NUM)) {
-    const v = parseFloat(m[1].replace(/,/g, '') + (m[2] || '')), u = (m[3] || '').toLowerCase();
-    raw.push(v);
-    if (u === '%') { pcts.push(v); continue; }
-    if (UNITS[u]) vals.push(v * UNITS[u]); else vals.push(v, v * 1e3, v * 1e6, v * 1e9);
-    pcts.push(v);   // tables often give percentages without the sign
-  }
-  return { vals, pcts, raw };
-}
-const near = (c, x) => Math.abs(c.v - x) <= Math.max(c.tol, 1e-9 * Math.abs(x));
-function hasNum(c, src) { return (c.pct ? src.pcts : c.unitless ? [...src.vals, ...src.raw] : src.vals).some(x => near(c, x)); }
-function valsOf(p) { return VALS[p] ||= { s: values(HAY[p].s), t: values(HAY[p].t) }; }
-// a word matches its forms ("outvoted" finds "outvote", "subsidiaries" finds "subsidiary"); a "quoted phrase" matches as written
-function wordRe(w) {
-  const stem = w.length > 4 ? w.replace(/(ies|es|s|ing|ed|ly)$/, '') : w;
-  return new RegExp('\\b' + reEsc(stem.length >= 3 ? stem : w) + '\\w*', 'i');
-}
-
-function parseQuery(text) {
-  const terms = [], nums = [];
-  text = text.replace(/"([^"]+)"/g, (_, ph) => { terms.push({ re: new RegExp('\\b' + reEsc(ph.trim()) + '\\b', 'i') }); return ' '; });
-  text = text.replace(/\$?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(%|thousand|million|billion|trillion|B\b|M\b)?/gi, (...m) => {
-    const c = claim([m[0], m[1], m[2], m[3]]);
-    if (!c) return ' ' + m[1] + ' ';
-    nums.push(c); return ' ';
-  });
-  for (const w of text.toLowerCase().match(/[a-z0-9][a-z0-9'-]*/g) || [])
-    if (!STOP.has(w) && !terms.some(t => t.w === w)) terms.push({ w, re: wordRe(w) });
-  return { terms, nums };
-}
-
-// model files are pinned to a revision, so a cached copy never goes stale
-async function modelFile(url, onProgress) {
-  let cache;
-  try { cache = await caches.open('ant-s1-search'); } catch {}
-  const hit = await cache?.match(url);
-  if (hit) return new Uint8Array(await hit.arrayBuffer());
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-  const total = Number(res.headers.get('content-length')) || 0, reader = res.body.getReader(), parts = [];
-  let got = 0;
-  for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; onProgress(got, total); }
-  const bytes = new Uint8Array(got);
-  let at = 0;
-  for (const p of parts) { bytes.set(p, at); at += p.length; }
-  await cache?.put(url, new Response(bytes)).catch(() => {});
-  return bytes;
-}
-async function loadEngine() {
-  const say = t => $('qn').textContent = t;
-  say('loading the index…');
-  const [ix, bits] = await Promise.all([
-    fetch('search/docs.json').then(r => r.json()),
-    fetch('search/index.bin').then(r => r.arrayBuffer()).then(b => new Uint8Array(b)),
-  ]);
-  const files = [];
-  for (const name of MODEL_FILES)
-    files.push(await modelFile(`https://huggingface.co/${ix.model.repo}/resolve/${ix.model.revision}/${name}`,
-      (got, total) => say(`downloading the model, first visit only: ${(got / 1e6).toFixed(0)}${total ? ' of ' + (total / 1e6).toFixed(0) : ''} MB`)));
-  say('starting the model…');
-  await init();
-  const offsets = Int32Array.from(ix.offsets);
-  const kind = ix.docs.map(d => d[1]), pid = ix.docs.map(d => d[0]);
-  const of = k => ix.docs.flatMap((d, i) => d[1] === k ? [i] : []);
-  const ids = { s: of('s'), t: of('t') };
-  const words = { s: bm25(ids.s.map(i => ix.docs[i][2])), t: bm25(ids.t.map(i => ix.docs[i][2])) };
-  ENGINE = { model: new ColBERT(...files, 32), bits, offsets, dim: ix.dim, kind, pid, ids, words, vectors: vectorStore('search/vectors.f16', offsets, ix.dim) };
-  $('q').disabled = false;
-  $('q').placeholder = 'Search the filing  ( / )';
-  say('');
-}
-const encode = text => ENGINE.model.encode({ sentences: [text] }, true).embeddings[0];
-
-let seq = 0;
+// the search itself is in search.js, shared with eval.html; here it greys out what doesn't match
+let Q = null, ready = false;
 async function search(text, jump) {
-  const mine = ++seq;
-  const { terms, nums } = parseQuery(text.trim());
-  if (!text.trim() || !ENGINE) { Q = null; $('qn').textContent = ''; renderSections(); renderTop(); return; }
-  await new Promise(r => setTimeout(r, 0));
-  const t0 = performance.now(), E = ENGINE;
-  const voiced = ourVoice(text);
-  const qs = encode(text), qt = voiced === text ? qs : encode(voiced);
-  // ColBERT on the sign bits, best FUSE_DEPTH of each kind; each query scores only its own kind's documents
-  const colbert = (q, k) => {
-    const tables = lookupTables(Float32Array.from(q.flat()), E.dim), scores = new Map();
-    for (const i of E.ids[k]) scores.set(i, tokenScores(tables, E.bits, E.offsets, i).reduce((a, b) => a + b, 0));
-    return E.ids[k].slice().sort((a, b) => scores.get(b) - scores.get(a)).slice(0, FUSE_DEPTH);
-  };
-  const keyword = (q, k) => E.words[k](q, FUSE_DEPTH).map(h => E.ids[k][h.chunk]);
-  const lists = [colbert(qs, 's'), colbert(qt, 't'), keyword(text, 's'), keyword(voiced, 't')];
-  if (nums.length) lists.push(E.pid.flatMap((p, i) => nums.some(c => hasNum(c, valsOf(p)[E.kind[i]])) ? [i] : []));
-  const fused = rrf(lists, { depth: FUSE_DEPTH }).slice(0, RERANK).map(h => h.chunk);
-  const [rs, rt] = await Promise.all([
-    rerank(qs, fused.filter(i => E.kind[i] === 's'), E.vectors, E.dim),
-    rerank(qt, fused.filter(i => E.kind[i] === 't'), E.vectors, E.dim),
-  ]);
-  if (mine !== seq) return;   // a newer search started meanwhile
-  // documents to paragraphs, best first; each paragraph remembers which of its documents ranked best
-  const rank = new Map(), via = new Map();
-  for (const h of [...rs, ...rt].sort((a, b) => b.score - a.score)) {
-    const p = E.pid[h.chunk];
-    if (rank.has(p)) continue;
-    rank.set(p, rank.size); via.set(p, E.kind[h.chunk]);
-    if (rank.size === TOP) break;
-  }
-  const secs = new Map(), up = new Set();
-  for (const [p, r] of rank) if (!secs.has(PSEC[p])) secs.set(PSEC[p], r);
-  for (const id of secs.keys()) for (let a = PARENT[id]; a && a !== 'root'; a = PARENT[a]) up.add(a);
-  Q = { text, terms, nums, rank, via, secs, up, open: new Set([...open, ...up]) };
-  $('qn').textContent = `${rank.size} paragraphs · ${secs.size} sections · ${Math.round(performance.now() - t0)} ms`;
+  if (!text.trim() || !ready) { Q = null; $('qn').textContent = ''; renderSections(); renderTop(); return; }
+  const r = await runSearch(text);
+  if (!r) return;   // a newer search started meanwhile
+  const up = new Set();
+  for (const id of r.secs.keys()) for (let a = PARENT[id]; a && a !== 'root'; a = PARENT[a]) up.add(a);
+  Q = { ...r, up, open: new Set([...open, ...up]) };
+  $('qn').textContent = `${r.rank.size} paragraphs · ${r.secs.size} sections · ${Math.round(r.ms)} ms`;
   if (jump) stepMatch(1);
   else { renderSections(); renderTop(); }
-}
-// relevance.html?eval: runs every query in eval.json and shows, in the top panel, the rank among the
-// search's sections of the first section that answers it
-async function runEval() {
-  const { queries } = await fetch('eval.json').then(r => r.json());
-  const rows = [];
-  for (const { q, answers } of queries) {
-    await search(q);
-    const ranked = [...Q.secs.keys()].sort((a, b) => Q.secs.get(a) - Q.secs.get(b));
-    const at = ranked.findIndex(id => answers.includes(id));
-    rows.push({ q, rank: at < 0 ? null : at + 1, got: ranked.slice(0, 3).map(id => NODES[id].title.slice(0, 40)).join(' · ') });
-  }
-  const share = k => rows.filter(r => r.rank && r.rank <= k).length;
-  const mrr = rows.reduce((t, r) => t + (r.rank ? 1 / r.rank : 0), 0) / rows.length;
-  const summary = `${rows.length} queries · found at #1: ${share(1)} · in the top 3: ${share(3)} · at all: ${share(99)} · MRR ${mrr.toFixed(2)}`;
-  console.log(summary); console.table(rows);
-  $('topPath').textContent = 'Search eval (eval.json)';
-  $('topText').innerHTML = `<div>${summary}</div><table style="font-size:13px;border-collapse:collapse;margin-top:8px">` +
-    rows.map(r => `<tr><td style="padding:2px 12px 2px 0">${r.rank ? '#' + r.rank : '—'}</td><td style="padding-right:12px">${esc(r.q)}</td><td style="opacity:.5">${esc(r.got)}</td></tr>`).join('') + '</table>';
-  $('hits').style.display = 'none';
-  window.EVAL = { summary, rows };
 }
 let qTimer;
 $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => search($('q').value), 350); });
 
-// the text with the query's words and numbers marked
-function mark(text) {
-  if (!Q) return esc(text);
-  const spans = [];
-  for (const t of Q.terms) for (const m of text.matchAll(new RegExp(t.re.source, 'gi'))) spans.push([m.index, m.index + m[0].length]);
-  if (Q.nums.length) for (const m of text.matchAll(NUM)) {
-    const src = values(m[0]);
-    if (Q.nums.some(c => hasNum(c, src))) spans.push([m.index, m.index + m[0].length]);
-  }
-  spans.sort((a, b) => a[0] - b[0]);
-  let out = '', at = 0;
-  for (const [a, b] of spans) { if (a < at) continue; out += esc(text.slice(at, a)) + '<mark>' + esc(text.slice(a, b)) + '</mark>'; at = b; }
-  return out + esc(text.slice(at));
-}
-// a few dozen words of the filing around its first match
-function snippet(text) {
-  const firsts = Q.terms.map(t => text.search(t.re)).filter(i => i >= 0);
-  if (Q.nums.length) for (const m of text.matchAll(NUM)) if (Q.nums.some(c => hasNum(c, values(m[0])))) { firsts.push(m.index); break; }
-  const at = firsts.length ? Math.min(...firsts) : 0;
-  const a = Math.max(0, text.lastIndexOf(' ', Math.max(0, at - 90)));
-  const b = text.indexOf(' ', at + 160);
-  return (a > 0 ? '… ' : '') + mark(text.slice(a, b < 0 ? undefined : b).trim()) + (b < 0 ? '' : ' …');
-}
 function allParas(n) { return [...n.paras, ...n.children.flatMap(allParas)]; }
 // under the TLDR: the selected section's paragraphs that match, each by its sentence; click one for the filing's words
 function renderHits() {
@@ -363,9 +179,9 @@ function renderHits() {
     ps.map(p => {
       const sub = PSEC[p] !== sel ? `<div class="sub">${esc(NODES[PSEC[p]].title)}</div>` : '';
       // found by the filing's own words: show where in them
-      return `<div class="h" data-p="${p}">${sub}<div class="hs"><span class="rk">#${Q.rank.get(p) + 1}</span>${mark(HAY[p].s)}<span class="pg">p. ${S1.paras[p][1]}</span></div>` +
-        (Q.via.get(p) === 't' ? `<div class="src snip">${snippet(HAY[p].t)}</div>` : '') +
-        `<div class="src full">${mark(HAY[p].t)}</div></div>`;
+      return `<div class="h" data-p="${p}">${sub}<div class="hs"><span class="rk">#${Q.rank.get(p) + 1}</span>${mark(HAY[p].s, Q)}<span class="pg">p. ${S1.paras[p][1]}</span></div>` +
+        (Q.via.get(p) === 't' ? `<div class="src snip">${snippet(HAY[p].t, Q)}</div>` : '') +
+        `<div class="src full">${mark(HAY[p].t, Q)}</div></div>`;
     }).join('');
 }
 $('top').addEventListener('click', e => e.target.closest('#hits .h')?.classList.toggle('open'));
@@ -469,7 +285,7 @@ addEventListener('resize', () => sel && renderRelated());
   ]);
   PARATLDR = await fetch('paratldr.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));   // from paratldr.py
   index(S1.root, null, 0);
-  prepSearch();
+  prepare(S1, PARATLDR);
   buildRelated();
   open.add('s32'); open.add('s33');
   $('related').classList.add('still');   // the first layout appears in place; later ones glide
@@ -477,7 +293,11 @@ addEventListener('resize', () => sel && renderRelated());
   requestAnimationFrame(() => requestAnimationFrame(() => $('related').classList.remove('still')));
   $('sections').querySelector('.s.sel')?.scrollIntoView({ block: 'center' });
   window.dbg = { search, stepMatch, get Q() { return Q; }, NODES, ORDER };   // for checking from the console
-  loadEngine().then(() => location.search === '?eval' && runEval()).catch(e => { $('qn').textContent = `search failed to load: ${e.message}`; throw e; });
+  load(t => $('qn').textContent = t).then(() => {
+    ready = true;
+    $('q').disabled = false;
+    $('q').placeholder = 'Search the filing  ( / )';
+  }).catch(e => { $('qn').textContent = `search failed to load: ${e.message}`; throw e; });
 })();
 </script>
 </body>

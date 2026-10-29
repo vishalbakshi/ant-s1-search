@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-1 Search Eval</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: #fff; color: #000; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+  button { font: inherit; font-size: 12px; border: 1px solid #000; background: #fff; color: #000; padding: 2px 8px; cursor: pointer; }
+  button.on { background: #000; color: #fff; }
+
+  /* the run: its numbers, then one cell per query */
+  #top { flex: none; border-bottom: 1px solid #000; padding: 14px 24px 16px; }
+  /* one line: the score, then each query's rank; a #1 is grey, so the eye goes to the rest */
+  .hint { font-size: 12px; opacity: .45; margin-bottom: 8px; }
+  .line { display: flex; align-items: baseline; gap: 18px; font-size: 13px; }
+  .line .grow { flex: 1; }
+  #score .was { opacity: .45; }
+  #status { opacity: .45; }
+  #strip { display: flex; }
+  .cell { position: relative; width: 20px; text-align: center; cursor: pointer; padding-bottom: 2px; border-bottom: 2px solid transparent; }
+  .cell.r1 { opacity: .3; }
+  .cell.r3, .cell.r9, .cell.miss { font-weight: bold; }
+  .cell.wait { opacity: .15; }
+  .cell.sel { opacity: 1; border-bottom-color: #000; }
+  .cell .d { position: absolute; top: -9px; left: 0; right: 0; font-size: 8px; }
+  #query { font-size: 22px; margin-top: 10px; }
+  #query .note { font-size: 13px; opacity: .55; margin-top: 4px; }
+
+  #app { display: grid; grid-template-columns: minmax(380px, 1.3fr) minmax(320px, 1fr); flex: 1; min-height: 0; }
+  .col { display: flex; flex-direction: column; min-height: 0; }
+  .col + .col { border-left: 1px solid #000; }
+  .head { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #000; }
+  .head b { font-size: 14px; margin-right: 8px; }
+
+  /* what the search returned, best first */
+  #results { overflow-y: auto; padding: 4px 0 30vh; }
+  .res { padding: 8px 12px; border-bottom: 1px solid #eee; }
+  .res .row { display: flex; gap: 8px; align-items: baseline; }
+  .res .rk { font-size: 12px; opacity: .5; width: 26px; flex: none; }
+  .res .ti { flex: 1; font-size: 14px; }
+  .res.ans .ti { font-weight: bold; }
+  .res .ti .path { display: block; font-size: 11px; opacity: .45; font-weight: normal; }
+  .res .pg { font-size: 10px; opacity: .5; }
+  .res .lab { flex: none; display: flex; gap: 4px; }
+  .res .why { font-size: 13px; line-height: 1.4; margin: 4px 0 0 34px; opacity: .8; cursor: pointer; }
+  .res .src { display: none; font-family: serif; font-size: 14px; line-height: 1.45; opacity: .8; margin: 4px 0 0 34px; }
+  .res.open .src { display: block; }
+  .res.missed { opacity: .55; }
+  .sub { padding: 14px 12px 4px; font-size: 12px; opacity: .6; }
+  mark { background: #FFD100; color: #000; }
+
+  /* the whole outline, magnified where the results and the answers are */
+  #map { position: relative; flex: 1; overflow: hidden; }
+  .m { position: absolute; left: 0; right: 0; top: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 12px;
+       transition: transform .35s cubic-bezier(.2,.7,.2,1), height .35s cubic-bezier(.2,.7,.2,1), font-size .35s, opacity .35s; }
+  .m.tiny { font-size: 0 !important; }
+  .m b { font-weight: normal; font-size: 10px; opacity: .6; margin-right: 6px; }
+  .m.ans { font-weight: bold; }
+  .m.got.ans b, .m.ans b { opacity: 1; }
+  .still .m { transition: none; }
+</style>
+</head>
+<body>
+<div id="top">
+  <div class="hint">← → to move between queries</div>
+  <div class="line"><span id="score"></span><span id="strip"></span><span class="grow"></span>
+    <span id="status"></span><button type="button" id="rerun" disabled>run again</button><button type="button" id="copy">copy answers</button></div>
+  <div id="query"></div>
+</div>
+<div id="app">
+  <div class="col">
+    <div class="head"><b>Results</b></div>
+    <div id="results"></div>
+  </div>
+  <div class="col">
+    <div class="head"><b>Outline</b>the whole filing · # the search's rank · ● an answer</div>
+    <div id="map"></div>
+  </div>
+</div>
+<script type="module">
+import { prepare, load, search, mark, esc, HAY, PSEC } from './search.js';
+const $ = id => document.getElementById(id);
+const RUNS = 's1-eval-runs', LABELS = 's1-eval-labels';
+let S1, TL, EV, NODES = {}, PARENT = {}, DEPTH = {}, ORDER = [];
+let cur = null;        // this run: { at, got: { query: [section ids, best first] }, best: { query: [paragraph id per section] } }
+let prev = null;       // the run before it
+let qi = 0;            // the query in focus
+let labels = {};       // { query: { section id: true (answers it) | false (doesn't) } }, on top of eval.json
+let detail = {};       // this run's full results per query, for the sentences
+const store = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+function index(n, parent, depth) {
+  NODES[n.id] = n; PARENT[n.id] = parent; DEPTH[n.id] = depth;
+  if (n.id !== 'root') ORDER.push(n.id);
+  n.children.forEach(c => index(c, n.id, depth + 1));
+}
+const pathOf = id => { const out = []; for (let a = PARENT[id]; a && a !== 'root'; a = PARENT[a]) out.unshift(NODES[a].title.slice(0, 40)); return out.join(' › '); };
+
+// ---------- scoring ----------
+// a query's answers are eval.json's plus the ones you marked, minus the ones you marked as not
+function answers(q) {
+  const own = EV.find(e => e.q === q).answers, mine = labels[q] || {};
+  return [...own.filter(id => mine[id] !== false), ...Object.keys(mine).filter(id => mine[id] && !own.includes(id))];
+}
+function rankIn(run, q) {
+  const got = run?.got[q];
+  if (!got) return undefined;   // not run yet
+  const a = answers(q), at = got.findIndex(id => a.includes(id));
+  return at < 0 ? null : at + 1;
+}
+function score(run) {
+  const ranks = EV.map(e => rankIn(run, e.q)).filter(r => r !== undefined);
+  const k = n => ranks.filter(r => r && r <= n).length;
+  return { n: ranks.length, at1: k(1), top3: k(3), found: k(99), mrr: ranks.reduce((t, r) => t + (r ? 1 / r : 0), 0) / Math.max(1, ranks.length) };
+}
+
+// ---------- the run ----------
+function renderTop() {
+  const s = score(cur), p = prev && score(prev);
+  const was = (a, b, f = x => x) => p && a !== b ? ` <span class="was">(was ${f(b)})</span>` : '';
+  $('score').innerHTML = !cur ? '' : s.n < EV.length ? `running ${s.n + 1} of ${EV.length}…` :
+    `<b>${s.at1}</b> of ${EV.length} at #1${was(s.at1, p?.at1)} · MRR <b>${s.mrr.toFixed(2)}</b>${was(s.mrr.toFixed(2), p?.mrr.toFixed(2))}`;
+  $('strip').innerHTML = EV.map((e, i) => {
+    const r = rankIn(cur, e.q), before = rankIn(prev, e.q);
+    const k = r === undefined ? 'wait' : r === null ? 'miss' : r === 1 ? 'r1' : r <= 3 ? 'r3' : 'r9';
+    // better or worse than the run before: rank up or down, or found / lost
+    const d = r === undefined || before === undefined || r === before ? '' : (r ?? 99) < (before ?? 99) ? '▲' : '▼';
+    return `<div class="cell ${k}${i === qi ? ' sel' : ''}" data-i="${i}" title="${esc(e.q)}">${r === undefined ? '' : r ?? '—'}${d ? `<span class="d">${d}</span>` : ''}</div>`;
+  }).join('');
+  const e = EV[qi], r = rankIn(cur, e.q), before = rankIn(prev, e.q);
+  $('query').innerHTML = `${esc(e.q)}<div class="note">${r === undefined ? 'not run yet' : r ? `first answer at #${r}` : 'no answer in the results'}` +
+    `${before !== undefined && before !== r ? ` (last run: ${before ? '#' + before : 'none'})` : ''}${e.note ? ' · ' + esc(e.note) : ''}</div>`;
+}
+$('strip').addEventListener('click', e => { const c = e.target.closest('.cell'); if (c) focus(+c.dataset.i); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') focus(Math.min(EV.length - 1, qi + 1));
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') focus(Math.max(0, qi - 1));
+  else return;
+  e.preventDefault();
+});
+function focus(i) { qi = i; renderTop(); renderResults(); renderMap(); }
+
+async function run() {
+  $('rerun').disabled = true;
+  const runs = store.get(RUNS, []);
+  prev = runs.at(-1) || null;
+  cur = { at: new Date().toISOString(), got: {}, best: {} };
+  detail = {};
+  renderTop();
+  for (const e of EV) {
+    const r = await search(e.q);
+    const got = [...r.secs.keys()].sort((a, b) => r.secs.get(a) - r.secs.get(b));
+    cur.got[e.q] = got;
+    detail[e.q] = r;
+    renderTop();
+    if (e === EV[qi]) { renderResults(); renderMap(); }
+  }
+  store.set(RUNS, [...runs, { at: cur.at, got: cur.got }].slice(-20));
+  $('rerun').disabled = false;
+  $('status').textContent = '';
+}
+$('rerun').onclick = run;
+
+// ---------- the results of one query ----------
+function renderResults() {
+  const e = EV[qi], got = cur?.got[e.q], r = detail[e.q];
+  if (!got) { $('results').innerHTML = '<div class="sub">running…</div>'; return; }
+  const a = answers(e.q), mine = labels[e.q] || {};
+  const row = (id, i, missed) => {
+    const ps = r ? [...r.rank.keys()].filter(p => PSEC[p] === id) : [];
+    const p = ps[0];
+    const lab = `<span class="lab"><button type="button" data-l="1" class="${mine[id] === true ? 'on' : ''}" title="this section answers the query">answers</button>` +
+      `<button type="button" data-l="0" class="${mine[id] === false ? 'on' : ''}" title="this section doesn't answer it">doesn't</button></span>`;
+    return `<div class="res${a.includes(id) ? ' ans' : ''}${missed ? ' missed' : ''}" data-id="${id}"><div class="row">` +
+      `<span class="rk">${missed ? '' : '#' + (i + 1)}</span><span class="ti"><span class="path">${esc(pathOf(id))}</span>${a.includes(id) ? '● ' : ''}${esc(NODES[id].title)} <span class="pg">p. ${NODES[id].page}</span></span>${lab}</div>` +
+      (p ? `<div class="why">${mark(HAY[p].s, r)}</div><div class="src">${mark(HAY[p].t, r)}</div>` : '') + '</div>';
+  };
+  const missed = a.filter(id => !got.includes(id));
+  $('results').innerHTML = got.map((id, i) => row(id, i, false)).join('') +
+    (missed.length ? `<div class="sub">answers the search didn't return</div>` + missed.map(id => row(id, 0, true)).join('') : '');
+}
+$('results').addEventListener('click', e => {
+  const res = e.target.closest('.res');
+  if (!res) return;
+  const b = e.target.closest('button[data-l]');
+  if (!b) { if (e.target.closest('.why')) res.classList.toggle('open'); return; }
+  // a mark toggles: click it again to go back to eval.json's answer
+  const q = EV[qi].q, id = res.dataset.id, v = b.dataset.l === '1';
+  labels[q] ||= {};
+  if (labels[q][id] === v) delete labels[q][id]; else labels[q][id] = v;
+  store.set(LABELS, labels);
+  renderTop(); renderResults(); renderMap();
+});
+// the answers with your marks applied, as eval.json's queries, to paste back to Claude
+$('copy').onclick = async () => {
+  const changed = EV.filter(e => labels[e.q] && Object.keys(labels[e.q]).length).map(e => ({ q: e.q, answers: answers(e.q) }));
+  try { await navigator.clipboard.writeText(changed.length ? JSON.stringify(changed, null, 1) : 'no changes to the answers'); } catch {}
+  $('copy').textContent = 'copied'; setTimeout(() => $('copy').textContent = 'copy answers', 1200);
+};
+
+// ---------- the outline map ----------
+// Like the related column on the relevance page: every section is a row and the whole outline fits.
+// The results and the answers are readable lines, magnified with their neighbours; everything else
+// shrinks to a hairline. So a miss shows whether it landed near the answer or somewhere else.
+const rows = new Map();
+function buildMap() {
+  for (const id of ORDER) { const el = document.createElement('div'); el.className = 'm tiny'; $('map').appendChild(el); rows.set(id, el); }
+}
+function renderMap() {
+  const H = $('map').clientHeight, e = EV[qi], got = cur?.got[e.q] || [], a = answers(e.q);
+  const foci = [...new Set([...got.slice(0, 8), ...a])].map(id => ORDER.indexOf(id)).filter(i => i >= 0);
+  let plan;
+  for (const [sigma, parts] of [[1.2, true], [0.8, true], [0.5, true], [0.5, false], [0.2, false]]) {
+    const g = ORDER.map((_, i) => foci.length ? Math.max(...foci.map(f => Math.exp(-((i - f) ** 2) / (2 * sigma * sigma)))) : 0);
+    const size = ORDER.map((id, i) => g[i] > 0.9 ? { h: 17, f: 12.5 } : g[i] > 0.3 ? { h: 9 + 6 * g[i], f: 7 + 5 * g[i] } : parts && DEPTH[id] === 1 ? { h: 12, f: 9 } : { h: 0 });
+    plan = { g, size };
+    if (size.reduce((t, x) => t + x.h, 0) <= H) break;
+  }
+  const { g, size } = plan;
+  const used = size.reduce((t, x) => t + x.h, 0), tiny = size.filter(x => !x.h).length;
+  const hair = Math.max(0, (H - used) / Math.max(1, tiny));
+  let y = 0;
+  ORDER.forEach((id, i) => {
+    const el = rows.get(id), { h, f } = size[i], at = got.indexOf(id), isAns = a.includes(id);
+    el.className = 'm' + (h ? '' : ' tiny') + (isAns ? ' ans' : '') + (at >= 0 ? ' got' : '');
+    el.innerHTML = (at >= 0 ? `<b>#${at + 1}</b>` : '') + (isAns ? '● ' : '') + esc(NODES[id].title);
+    el.style.transform = `translateY(${y}px)`;
+    el.style.height = (h || hair) + 'px';
+    if (f) el.style.fontSize = f + 'px';
+    el.style.opacity = at >= 0 || isAns ? 1 : 0.3 + 0.25 * g[i];
+    el.style.paddingLeft = 12 + (DEPTH[id] - 1) * 12 + 'px';
+    y += h || hair;
+  });
+}
+addEventListener('resize', () => renderMap());
+
+(async () => {
+  let ev;
+  [S1, TL, ev] = await Promise.all([
+    fetch('../../reader/s1.json').then(r => r.json()),
+    fetch('paratldr.json').then(r => r.json()),
+    fetch('eval.json').then(r => r.json()),
+  ]);
+  EV = ev.queries;
+  index(S1.root, null, 0);
+  prepare(S1, TL);
+  labels = store.get(LABELS, {});
+  buildMap();
+  $('map').classList.add('still');
+  renderTop(); renderResults(); renderMap();
+  requestAnimationFrame(() => requestAnimationFrame(() => $('map').classList.remove('still')));
+  await load(t => $('status').textContent = t);
+  await run();
+  window.EVAL = { score: () => score(cur), cur: () => cur };   // for checking from the console
+})();
+</script>
+</body>
+</html>

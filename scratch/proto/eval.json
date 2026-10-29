@@ -1,5 +1,5 @@
 {
- "about": "Queries for the relevance page's search. Each lists the sections of reader/s1.json that answer it, best first; a query counts as found at the rank of the first of them among the search's sections. The answers were picked by reading the filing, not from the search's results. Run it at relevance.html?eval. A few answers were added after the first run, where reading the sections it ranked high showed they answer the query too; each such query says so in its note.",
+ "about": "Queries for the relevance page's search. Each lists the sections of reader/s1.json that answer it, best first; a query counts as found at the rank of the first of them among the search's sections. The answers were picked by reading the filing, not from the search's results. Run it at eval.html. A few answers were added after the first run, where reading the sections it ranked high showed they answer the query too; each such query says so in its note.",
  "queries": [
   {
    "q": "how much did they spend in training compute",
