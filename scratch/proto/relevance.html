@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-1 Relevance</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: #fff; color: #000; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; }
+  /* the selected section in a few sentences, for the public */
+  #top { flex: none; border-bottom: 1px solid #000; padding: 16px 24px 18px; min-height: 120px; }
+  #top .path { font-size: 12px; color: #000; opacity: .45; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #top .title { font-size: 15px; font-weight: bold; margin: 4px 0 6px; }
+  #top .text { font-size: 19px; line-height: 1.45; max-width: 60em; margin-top: 6px; }
+  #top { max-height: 45vh; overflow-y: auto; }
+  .s .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; margin-top: 6px; opacity: .5; }
+  #app { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.3fr); flex: 1; min-height: 0; }
+  .col { display: flex; flex-direction: column; min-height: 0; }
+  .col + .col { border-left: 1px solid #000; }
+  .head { padding: 8px 12px; font-size: 12px; border-bottom: 1px solid #000; }
+  .head b { font-size: 14px; margin-right: 8px; }
+
+  /* sections: a plain outline */
+  #sections { overflow-y: auto; padding: 6px 0 40vh; font-size: 13px; }
+  .s { display: flex; gap: 6px; padding: 2px 12px; cursor: pointer; white-space: nowrap; }
+  .s:hover { background: #f2f2f2; }
+  .s.sel { background: #000; color: #fff; }
+  .s .tw { width: 10px; flex: none; font-size: 10px; padding-top: 2px; }
+  .s .ti { overflow: hidden; text-overflow: ellipsis; flex: 1; }
+  .s .pg { font-size: 10px; opacity: .6; padding-top: 2px; }
+  .s.d1 .ti { font-weight: bold; }
+
+  /* related sections: the same outline, all of it, fitted to the screen and magnified at three places */
+  #related { position: relative; flex: 1; overflow: hidden; }
+  .r { position: absolute; left: 0; right: 0; top: 0; overflow: hidden; white-space: nowrap; transition: transform .35s cubic-bezier(.2,.7,.2,1), height .35s cubic-bezier(.2,.7,.2,1), font-size .35s, opacity .35s; }
+  .r .line { display: block; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+  .r.tiny .line { display: none; }
+  .r { color: #000; }
+  .r.big { white-space: normal; padding-top: 6px; padding-bottom: 8px; }
+  .r.big .line { display: none; }
+  .r .card { display: none; }
+  .r.big .card { display: block; }
+  .card .t { font-size: 15px; font-weight: bold; }
+  .card .d { font-size: 13px; line-height: 1.35; margin-top: 2px; }
+  .still .r { transition: none; }
+  #none { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 13px; opacity: .6; }
+
+  /* search: the outline stays; what doesn't match greys out */
+  .head.search { display: flex; align-items: center; gap: 8px; }
+  #q { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 3px 6px; border: 1px solid #000; border-radius: 0; }
+  #qn { opacity: .6; white-space: nowrap; }
+  .s.off { opacity: .3; }
+  .s.up { opacity: .6; }
+  .s .n { font-size: 10px; padding-top: 2px; }
+  .s.sel.off, .s.sel.up { opacity: 1; }
+  mark { background: #FFD100; color: #000; }
+  #hits { margin-top: 14px; border-top: 1px solid #ddd; padding-top: 8px; max-width: 60em; }
+  #hits .hl { font-size: 12px; opacity: .6; margin-bottom: 4px; }
+  #hits .h { padding: 6px 0; cursor: pointer; }
+  #hits .hs { font-size: 15px; line-height: 1.4; }
+  #hits .sub { font-size: 11px; opacity: .45; }
+  #hits .pg { font-size: 10px; opacity: .5; margin-left: 6px; }
+  #hits .rk { font-size: 11px; opacity: .5; margin-right: 6px; }
+  #hits .src { font-family: serif; font-size: 15px; line-height: 1.45; opacity: .8; margin-top: 4px; }
+  #hits .full { display: none; }
+  #hits .h.open .full { display: block; }
+  #hits .h.open .snip { display: none; }
+</style>
+</head>
+<body>
+<div id="top"><div class="path" id="topPath"></div><div class="text" id="topText"></div><div id="hits"></div></div>
+<div id="app">
+  <div class="col">
+    <div class="head search" title="click to select · ↑ ↓ to move · → ← to open and close · / to search · Esc to clear"><b>Sections</b><input id="q" type="search" placeholder="Loading search…" autocomplete="off" disabled><span id="qn"></span></div>
+    <div id="sections"></div>
+  </div>
+  <div class="col">
+    <div class="head"><b>Related sections</b><span id="relHead">the whole outline, magnified at the three sections most related to the one you select</span></div>
+    <div id="related"><div id="none">Nothing in other parts of the filing shares much with this section.</div></div>
+  </div>
+</div>
+<script type="module">
+import init, { ColBERT } from 'https://cdn.jsdelivr.net/npm/pylate-rs@1.0.4/pylate_rs.js';
+import { lookupTables, tokenScores } from '../../scorer.js';
+import { ourVoice } from '../../query.js';
+import { bm25 } from '../../fts.js';
+import { rerank, rrf, vectorStore } from '../../hybrid.js';
+const $ = id => document.getElementById(id);
+let S1, THREADS, PUBLIC = {}, PARATLDR = {}, NODES = {}, PARENT = {}, DEPTH = {}, ORDER = [];
+const open = new Set();
+let sel = null;
+
+function index(n, parent, depth) {
+  NODES[n.id] = n; PARENT[n.id] = parent; DEPTH[n.id] = depth;
+  if (n.id !== 'root') ORDER.push(n.id);
+  n.children.forEach(c => index(c, n.id, depth + 1));
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------- sections ----------
+// while searching, the outline opens to every match; closing and opening then works on a copy,
+// so clearing the search gives back the outline as you left it
+const opened = () => Q ? Q.open : open;
+function visible() {
+  const out = [], o = opened();
+  const add = n => { out.push(n.id); if (o.has(n.id)) n.children.forEach(add); };
+  S1.root.children.forEach(add);
+  return out;
+}
+function renderSections() {
+  const box = $('sections'), o = opened();
+  box.innerHTML = visible().map(id => {
+    const n = NODES[id];
+    const tw = n.children.length ? (o.has(id) ? '▾' : '▸') : '';
+    const k = !Q ? '' : Q.secs.has(id) ? ' hit' : Q.up.has(id) ? ' up' : ' off';
+    const count = Q?.secs.has(id) ? `<span class="n">#${Q.secs.get(id) + 1}</span>` : '';
+    return `<div class="s d${DEPTH[id]}${id === sel ? ' sel' : ''}${k}" data-id="${id}" style="padding-left:${12 + (DEPTH[id] - 1) * 16}px" title="${esc(n.title)}">` +
+      `<span class="tw">${tw}</span><span class="ti">${esc(n.title)}</span>${count}<span class="pg">${n.page}</span></div>`;
+  }).join('');
+}
+$('sections').addEventListener('click', e => {
+  const row = e.target.closest('.s');
+  if (!row) return;
+  const id = row.dataset.id, o = opened();
+  if (id === sel && NODES[id].children.length) { o.has(id) ? o.delete(id) : o.add(id); renderSections(); return; }
+  if (NODES[id].children.length) o.add(id);
+  select(id);
+});
+// the next match in rank order (dir 1) or the one before (dir -1); from outside the matches, the best one
+function stepMatch(dir) {
+  const ids = [...Q.secs.keys()].sort((a, b) => Q.secs.get(a) - Q.secs.get(b));
+  const at = ids.indexOf(sel);
+  const next = at < 0 ? ids[0] : ids[at + dir];
+  if (!next) return;
+  for (let a = PARENT[next]; a && a !== 'root'; a = PARENT[a]) Q.open.add(a);
+  select(next);
+}
+document.addEventListener('keydown', e => {
+  const typing = e.target === $('q');
+  if (e.key === '/' && !typing) { e.preventDefault(); $('q').focus(); $('q').select(); return; }
+  if (e.key === 'Escape') { if ($('q').value) { $('q').value = ''; search(''); } $('q').blur(); return; }
+  if (!sel || (typing && !['ArrowDown', 'ArrowUp', 'Enter'].includes(e.key))) return;
+  const vis = visible(), i = vis.indexOf(sel), o = opened();
+  if (typing && e.key === 'Enter') { e.preventDefault(); clearTimeout(qTimer); search($('q').value, true); return; }
+  if (Q && e.key === 'ArrowDown') stepMatch(1);   // while searching, ↑ ↓ go from match to match, best first
+  else if (Q && e.key === 'ArrowUp') stepMatch(-1);
+  else if (e.key === 'ArrowDown' && vis[i + 1]) select(vis[i + 1]);
+  else if (e.key === 'ArrowUp' && i > 0) select(vis[i - 1]);
+  else if (e.key === 'ArrowRight' && NODES[sel].children.length && !o.has(sel)) { o.add(sel); renderSections(); }
+  else if (e.key === 'ArrowLeft') { if (o.has(sel)) { o.delete(sel); renderSections(); } else if (PARENT[sel] !== 'root') { o.delete(PARENT[sel]); select(PARENT[sel]); } }
+  else return;
+  e.preventDefault();
+  $('sections').querySelector('.s.sel')?.scrollIntoView({ block: 'nearest' });
+});
+
+// ---------- search ----------
+// Hybrid search with rerank, as on the hosted search page: ColBERT and BM25 each rank the documents,
+// reciprocal rank fusion merges the lists, and the top RERANK are reranked by exact MaxSim on their
+// full vectors. The documents are paragraphs, each twice (build_search.mjs): the filing's text, searched
+// with the query in the filing's voice ("we"), and the sentence written for it, searched with the query
+// as typed (the sentences say "Anthropic"). Numbers in the query add a third list, matched by value
+// across units, so "$16B" finds "16,286" in a table given in millions. The best TOP paragraphs match;
+// a section's badge is its best paragraph's rank.
+const FUSE_DEPTH = 100, RERANK = 50, TOP = 15;
+const MODEL_FILES = ['model.safetensors', '1_Dense/model.safetensors', 'tokenizer.json', 'config.json',
+  'config_sentence_transformers.json', '1_Dense/config.json', 'special_tokens_map.json'];
+let Q = null, ENGINE = null;
+const HAY = {}, PSEC = {}, VALS = {};
+const STOP = new Set(('a an and are as at be been but by can could did do does for from had has have how i if in into is it its ' +
+  'me my no not of on or our out so than that the their them then there these they this those to too up us was we were what ' +
+  'when where which while who whom why will with would you your about any much many more most should just also very').split(' '));
+const UNITS = { thousand: 1e3, million: 1e6, billion: 1e9, trillion: 1e12, b: 1e9, m: 1e6 };
+const NUM = /(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(%|thousand|million|billion|trillion|B\b|M\b)?/gi;
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function prepSearch() {
+  for (const id of ORDER) for (const p of NODES[id].paras) {
+    PSEC[p] = id;
+    HAY[p] = { s: PARATLDR[id]?.paras?.[p] || '', t: S1.paras[p][0] };
+  }
+}
+// a number the query asks about, or null when it is a year or a small count (searched as a word instead)
+function claim(m) {
+  const whole = m[1], frac = m[2] || '', unit = (m[3] || '').toLowerCase();
+  const v = parseFloat(whole.replace(/,/g, '') + frac);
+  if (unit !== '%' && !frac && (v < 10 || (v >= 1900 && v <= 2100))) return null;
+  const scale = UNITS[unit] || 1;
+  return { v: v * scale, tol: frac ? 0.5 * 10 ** -(frac.length - 1) * scale : scale > 1 ? 0.5 * scale : 0, pct: unit === '%', unitless: !unit };
+}
+// every value a text could mean: as written, and scaled the way a table in thousands, millions or billions would be
+function values(text) {
+  const vals = [], pcts = [], raw = [];
+  for (const m of text.matchAll(NUM)) {
+    const v = parseFloat(m[1].replace(/,/g, '') + (m[2] || '')), u = (m[3] || '').toLowerCase();
+    raw.push(v);
+    if (u === '%') { pcts.push(v); continue; }
+    if (UNITS[u]) vals.push(v * UNITS[u]); else vals.push(v, v * 1e3, v * 1e6, v * 1e9);
+    pcts.push(v);   // tables often give percentages without the sign
+  }
+  return { vals, pcts, raw };
+}
+const near = (c, x) => Math.abs(c.v - x) <= Math.max(c.tol, 1e-9 * Math.abs(x));
+function hasNum(c, src) { return (c.pct ? src.pcts : c.unitless ? [...src.vals, ...src.raw] : src.vals).some(x => near(c, x)); }
+function valsOf(p) { return VALS[p] ||= { s: values(HAY[p].s), t: values(HAY[p].t) }; }
+// a word matches its forms ("outvoted" finds "outvote", "subsidiaries" finds "subsidiary"); a "quoted phrase" matches as written
+function wordRe(w) {
+  const stem = w.length > 4 ? w.replace(/(ies|es|s|ing|ed|ly)$/, '') : w;
+  return new RegExp('\\b' + reEsc(stem.length >= 3 ? stem : w) + '\\w*', 'i');
+}
+
+function parseQuery(text) {
+  const terms = [], nums = [];
+  text = text.replace(/"([^"]+)"/g, (_, ph) => { terms.push({ re: new RegExp('\\b' + reEsc(ph.trim()) + '\\b', 'i') }); return ' '; });
+  text = text.replace(/\$?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(%|thousand|million|billion|trillion|B\b|M\b)?/gi, (...m) => {
+    const c = claim([m[0], m[1], m[2], m[3]]);
+    if (!c) return ' ' + m[1] + ' ';
+    nums.push(c); return ' ';
+  });
+  for (const w of text.toLowerCase().match(/[a-z0-9][a-z0-9'-]*/g) || [])
+    if (!STOP.has(w) && !terms.some(t => t.w === w)) terms.push({ w, re: wordRe(w) });
+  return { terms, nums };
+}
+
+// model files are pinned to a revision, so a cached copy never goes stale
+async function modelFile(url, onProgress) {
+  let cache;
+  try { cache = await caches.open('ant-s1-search'); } catch {}
+  const hit = await cache?.match(url);
+  if (hit) return new Uint8Array(await hit.arrayBuffer());
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  const total = Number(res.headers.get('content-length')) || 0, reader = res.body.getReader(), parts = [];
+  let got = 0;
+  for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); got += value.length; onProgress(got, total); }
+  const bytes = new Uint8Array(got);
+  let at = 0;
+  for (const p of parts) { bytes.set(p, at); at += p.length; }
+  await cache?.put(url, new Response(bytes)).catch(() => {});
+  return bytes;
+}
+async function loadEngine() {
+  const say = t => $('qn').textContent = t;
+  say('loading the index…');
+  const [ix, bits] = await Promise.all([
+    fetch('search/docs.json').then(r => r.json()),
+    fetch('search/index.bin').then(r => r.arrayBuffer()).then(b => new Uint8Array(b)),
+  ]);
+  const files = [];
+  for (const name of MODEL_FILES)
+    files.push(await modelFile(`https://huggingface.co/${ix.model.repo}/resolve/${ix.model.revision}/${name}`,
+      (got, total) => say(`downloading the model, first visit only: ${(got / 1e6).toFixed(0)}${total ? ' of ' + (total / 1e6).toFixed(0) : ''} MB`)));
+  say('starting the model…');
+  await init();
+  const offsets = Int32Array.from(ix.offsets);
+  const kind = ix.docs.map(d => d[1]), pid = ix.docs.map(d => d[0]);
+  const of = k => ix.docs.flatMap((d, i) => d[1] === k ? [i] : []);
+  const ids = { s: of('s'), t: of('t') };
+  const words = { s: bm25(ids.s.map(i => ix.docs[i][2])), t: bm25(ids.t.map(i => ix.docs[i][2])) };
+  ENGINE = { model: new ColBERT(...files, 32), bits, offsets, dim: ix.dim, kind, pid, ids, words, vectors: vectorStore('search/vectors.f16', offsets, ix.dim) };
+  $('q').disabled = false;
+  $('q').placeholder = 'Search the filing  ( / )';
+  say('');
+}
+const encode = text => ENGINE.model.encode({ sentences: [text] }, true).embeddings[0];
+
+let seq = 0;
+async function search(text, jump) {
+  const mine = ++seq;
+  const { terms, nums } = parseQuery(text.trim());
+  if (!text.trim() || !ENGINE) { Q = null; $('qn').textContent = ''; renderSections(); renderTop(); return; }
+  await new Promise(r => setTimeout(r, 0));
+  const t0 = performance.now(), E = ENGINE;
+  const voiced = ourVoice(text);
+  const qs = encode(text), qt = voiced === text ? qs : encode(voiced);
+  // ColBERT on the sign bits, best FUSE_DEPTH of each kind; each query scores only its own kind's documents
+  const colbert = (q, k) => {
+    const tables = lookupTables(Float32Array.from(q.flat()), E.dim), scores = new Map();
+    for (const i of E.ids[k]) scores.set(i, tokenScores(tables, E.bits, E.offsets, i).reduce((a, b) => a + b, 0));
+    return E.ids[k].slice().sort((a, b) => scores.get(b) - scores.get(a)).slice(0, FUSE_DEPTH);
+  };
+  const keyword = (q, k) => E.words[k](q, FUSE_DEPTH).map(h => E.ids[k][h.chunk]);
+  const lists = [colbert(qs, 's'), colbert(qt, 't'), keyword(text, 's'), keyword(voiced, 't')];
+  if (nums.length) lists.push(E.pid.flatMap((p, i) => nums.some(c => hasNum(c, valsOf(p)[E.kind[i]])) ? [i] : []));
+  const fused = rrf(lists, { depth: FUSE_DEPTH }).slice(0, RERANK).map(h => h.chunk);
+  const [rs, rt] = await Promise.all([
+    rerank(qs, fused.filter(i => E.kind[i] === 's'), E.vectors, E.dim),
+    rerank(qt, fused.filter(i => E.kind[i] === 't'), E.vectors, E.dim),
+  ]);
+  if (mine !== seq) return;   // a newer search started meanwhile
+  // documents to paragraphs, best first; each paragraph remembers which of its documents ranked best
+  const rank = new Map(), via = new Map();
+  for (const h of [...rs, ...rt].sort((a, b) => b.score - a.score)) {
+    const p = E.pid[h.chunk];
+    if (rank.has(p)) continue;
+    rank.set(p, rank.size); via.set(p, E.kind[h.chunk]);
+    if (rank.size === TOP) break;
+  }
+  const secs = new Map(), up = new Set();
+  for (const [p, r] of rank) if (!secs.has(PSEC[p])) secs.set(PSEC[p], r);
+  for (const id of secs.keys()) for (let a = PARENT[id]; a && a !== 'root'; a = PARENT[a]) up.add(a);
+  Q = { text, terms, nums, rank, via, secs, up, open: new Set([...open, ...up]) };
+  $('qn').textContent = `${rank.size} paragraphs · ${secs.size} sections · ${Math.round(performance.now() - t0)} ms`;
+  if (jump) stepMatch(1);
+  else { renderSections(); renderTop(); }
+}
+let qTimer;
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => search($('q').value), 350); });
+
+// the text with the query's words and numbers marked
+function mark(text) {
+  if (!Q) return esc(text);
+  const spans = [];
+  for (const t of Q.terms) for (const m of text.matchAll(new RegExp(t.re.source, 'gi'))) spans.push([m.index, m.index + m[0].length]);
+  if (Q.nums.length) for (const m of text.matchAll(NUM)) {
+    const src = values(m[0]);
+    if (Q.nums.some(c => hasNum(c, src))) spans.push([m.index, m.index + m[0].length]);
+  }
+  spans.sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  for (const [a, b] of spans) { if (a < at) continue; out += esc(text.slice(at, a)) + '<mark>' + esc(text.slice(a, b)) + '</mark>'; at = b; }
+  return out + esc(text.slice(at));
+}
+// a few dozen words of the filing around its first match
+function snippet(text) {
+  const firsts = Q.terms.map(t => text.search(t.re)).filter(i => i >= 0);
+  if (Q.nums.length) for (const m of text.matchAll(NUM)) if (Q.nums.some(c => hasNum(c, values(m[0])))) { firsts.push(m.index); break; }
+  const at = firsts.length ? Math.min(...firsts) : 0;
+  const a = Math.max(0, text.lastIndexOf(' ', Math.max(0, at - 90)));
+  const b = text.indexOf(' ', at + 160);
+  return (a > 0 ? '… ' : '') + mark(text.slice(a, b < 0 ? undefined : b).trim()) + (b < 0 ? '' : ' …');
+}
+function allParas(n) { return [...n.paras, ...n.children.flatMap(allParas)]; }
+// under the TLDR: the selected section's paragraphs that match, each by its sentence; click one for the filing's words
+function renderHits() {
+  const box = $('hits');
+  const ps = Q ? allParas(NODES[sel]).filter(p => Q.rank.has(p)).sort((a, b) => Q.rank.get(a) - Q.rank.get(b)) : [];
+  if (!ps.length) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = `<div class="hl">${ps.length} of the ${Q.rank.size} best paragraphs ${ps.length > 1 ? 'are' : 'is'} here · click one for the filing's words</div>` +
+    ps.map(p => {
+      const sub = PSEC[p] !== sel ? `<div class="sub">${esc(NODES[PSEC[p]].title)}</div>` : '';
+      // found by the filing's own words: show where in them
+      return `<div class="h" data-p="${p}">${sub}<div class="hs"><span class="rk">#${Q.rank.get(p) + 1}</span>${mark(HAY[p].s)}<span class="pg">p. ${S1.paras[p][1]}</span></div>` +
+        (Q.via.get(p) === 't' ? `<div class="src snip">${snippet(HAY[p].t)}</div>` : '') +
+        `<div class="src full">${mark(HAY[p].t)}</div></div>`;
+    }).join('');
+}
+$('top').addEventListener('click', e => e.target.closest('#hits .h')?.classList.toggle('open'));
+function select(id) {
+  sel = id;
+  renderSections();
+  renderTop();
+  renderRelated();
+}
+function renderTop() {
+  const n = NODES[sel], up = [];
+  for (let a = PARENT[sel]; a && a !== 'root'; a = PARENT[a]) up.unshift(NODES[a].title);
+  $('topPath').textContent = up.join('  ›  ') || 'Anthropic Form S-1';
+  // the heading is already in Sections; the panel holds only the TLDR, built from one sentence per paragraph
+  $('topText').textContent = PARATLDR[sel]?.tldr || PUBLIC[sel] || n.tldr || '';
+  renderHits();
+}
+
+// ---------- related sections ----------
+// Every section of the outline is a row; the whole outline always fits. The three most related
+// sections open into cards, their neighbours in the outline are readable lines, and everything
+// else shrinks to a hairline, so you see where in the filing each related section sits.
+const rows = new Map();
+function buildRelated() {
+  const box = $('related');
+  for (const id of ORDER) {
+    const n = NODES[id];
+    const el = document.createElement('div');
+    el.className = 'r tiny';
+    el.innerHTML = `<span class="line">${esc(n.title)}</span><div class="card"></div>`;
+    box.appendChild(el);
+    rows.set(id, el);
+  }
+}
+function renderRelated() {
+  const box = $('related');
+  const H = box.clientHeight, W = box.clientWidth;
+  const top3 = (THREADS[sel] || []).slice(0, 3);
+  const foci = top3.map(t => ORDER.indexOf(t.id));
+  $('none').style.display = top3.length ? 'none' : 'flex';
+
+  // 1. the cards: fill them and measure their height at full size
+  const cardH = {};
+  top3.forEach(t => {
+    const n = NODES[t.id], el = rows.get(t.id);
+    el.querySelector('.card').innerHTML = `<div class="t">${esc(n.title)}</div><div class="d">${esc(n.tldr || '')}</div>`;
+  });
+  // measure each card off-screen at its final width
+  const probe = document.createElement('div');
+  probe.className = 'r big'; probe.style.cssText = `visibility:hidden;transition:none;position:absolute;width:${W}px`;
+  box.appendChild(probe);
+  top3.forEach(t => {
+    probe.style.paddingLeft = 12 + (DEPTH[t.id] - 1) * 14 + 'px';
+    probe.innerHTML = `<div class="card">${rows.get(t.id).querySelector('.card').innerHTML}</div>`;
+    cardH[t.id] = probe.offsetHeight;
+  });
+  probe.remove();
+
+  // 2. every other row gets a size from its distance to the nearest card, Dock-style. The parts of
+  // the filing stay as small labels (landmarks) and the rest shrinks to nothing. When that doesn't
+  // fit, the magnification narrows, then the part labels go.
+  let plan;
+  for (const [sigma, parts] of [[1.8, true], [1.3, true], [1, true], [1.3, false], [0.8, false]]) {
+    const g = ORDER.map((id, i) => foci.length ? Math.max(...foci.map(f => Math.exp(-((i - f) ** 2) / (2 * sigma * sigma)))) : 0);
+    const size = ORDER.map((id, i) => {
+      if (cardH[id]) return { h: cardH[id], kind: 'big' };
+      if (g[i] > 0.25) { const f = 9 + 4 * g[i]; return { h: f * 1.35, f, kind: 'line' }; }
+      if (parts && DEPTH[id] === 1) return { h: 12, f: 9, kind: 'part' };
+      return { h: 0, kind: 'tiny' };
+    });
+    plan = { g, size };
+    if (size.reduce((t, x) => t + x.h, 0) <= H) break;
+  }
+  const { g, size } = plan;
+  const used = size.reduce((t, x) => t + x.h, 0);
+  const tiny = size.filter(x => x.kind === 'tiny').length;
+  const hair = Math.max(0, (H - used) / Math.max(1, tiny));   // what's left, shared by the rest
+
+  // 3. lay the rows down top to bottom
+  let y = 0;
+  ORDER.forEach((id, i) => {
+    const el = rows.get(id);
+    const { kind, f } = size[i];
+    const h = kind === 'tiny' ? hair : size[i].h;
+    el.className = 'r' + (kind === 'line' ? '' : ' ' + kind);
+    el.style.transform = `translateY(${y}px)`;
+    el.style.height = h + 'px';
+    if (f) { el.style.fontSize = f + 'px'; el.style.lineHeight = '1.35'; }
+    el.style.opacity = kind === 'big' ? 1 : 0.3 + 0.25 * g[i];   // everything but the three is grey
+    el.style.paddingLeft = 12 + (DEPTH[id] - 1) * 14 + 'px';
+    y += h;
+  });
+}
+addEventListener('resize', () => sel && renderRelated());
+
+(async () => {
+  [S1, THREADS, PUBLIC] = await Promise.all([
+    fetch('../../reader/s1.json').then(r => r.json()),
+    fetch('threads.json').then(r => r.json()),
+    fetch('public.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),   // the TLDRs for the public, from public_tldr.py
+  ]);
+  PARATLDR = await fetch('paratldr.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));   // from paratldr.py
+  index(S1.root, null, 0);
+  prepSearch();
+  buildRelated();
+  open.add('s32'); open.add('s33');
+  $('related').classList.add('still');   // the first layout appears in place; later ones glide
+  select('s36');
+  requestAnimationFrame(() => requestAnimationFrame(() => $('related').classList.remove('still')));
+  $('sections').querySelector('.s.sel')?.scrollIntoView({ block: 'center' });
+  window.dbg = { search, stepMatch, get Q() { return Q; }, NODES, ORDER };   // for checking from the console
+  loadEngine().catch(e => { $('qn').textContent = `search failed to load: ${e.message}`; throw e; });
+})();
+</script>
+</body>
+</html>

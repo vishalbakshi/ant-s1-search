@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S-1 TLDR Review</title>
+<style>
+  body { margin: 0; background: #fff; color: #000; font-family: sans-serif; }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 120px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .intro { font-size: 13px; opacity: .6; margin: 0 0 24px; }
+  .bar { position: sticky; top: 0; background: #fff; padding: 8px 0; border-bottom: 1px solid #000; display: flex; gap: 12px; align-items: center; font-size: 13px; z-index: 2; }
+  .bar .grow { flex: 1; }
+  button { font: inherit; font-size: 12px; border: 1px solid #000; background: #fff; color: #000; padding: 3px 8px; cursor: pointer; }
+  button.on { background: #000; color: #fff; }
+  section { padding: 22px 0; border-bottom: 1px solid #ddd; }
+  .path { font-size: 11px; opacity: .45; }
+  .title { font-size: 13px; opacity: .6; margin: 2px 0 10px; }
+  .label { font-size: 11px; opacity: .45; margin: 12px 0 2px; }
+  .tldr { font-size: 18px; line-height: 1.45; }
+  .means { font-size: 15px; line-height: 1.5; }
+  details { margin-top: 12px; font-size: 13px; }
+  summary { cursor: pointer; opacity: .6; }
+  .pair { margin: 14px 0; }
+  .sent { font-size: 14px; line-height: 1.4; }
+  .pair p { margin: 4px 0 0; }
+  .src p { font-family: serif; font-size: 14px; line-height: 1.45; opacity: .8; }
+  .src .pg { font-size: 10px; opacity: .5; margin-right: 6px; }
+  .verdict { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; }
+  .verdict textarea { flex: 1; min-height: 32px; font: inherit; font-size: 13px; padding: 6px; border: 1px solid #ccc; resize: vertical; }
+  #copied { opacity: 0; transition: opacity .3s; }
+</style>
+</head>
+<body>
+<main>
+  <h1>25 sections: TLDRs built from their paragraphs</h1>
+  <p class="intro">Each paragraph of the filing got one sentence saying what it means; the TLDR merges those sentences into one short paragraph. Open "the filing's text" to see each paragraph with its sentence above it. Your marks and notes are saved in this browser; "copy feedback" puts them on the clipboard to paste back to Claude.</p>
+  <div class="bar"><span id="tally"></span><span class="grow"></span><span id="copied">copied</span><button type="button" id="copy">copy feedback</button></div>
+  <div id="list"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 's1-tldr-review-paras';
+let marks = {};
+try { marks = JSON.parse(localStorage.getItem(KEY)) || {}; } catch {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(marks)); } catch {} tally(); };
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let S1, EX, NODES = {}, PARENT = {};
+function index(n, p) { NODES[n.id] = n; PARENT[n.id] = p; n.children.forEach(c => index(c, n.id)); }
+function pathOf(id) { const out = []; for (let a = PARENT[id]; a && a !== 'root'; a = PARENT[a]) out.unshift(NODES[a].title); return out.join('  ›  '); }
+function allParas(n) { return [...n.paras, ...n.children.flatMap(allParas)]; }
+function tally() {
+  const v = Object.values(marks);
+  $('tally').textContent = `${v.filter(m => m.verdict === 'good').length} good · ${v.filter(m => m.verdict === 'work').length} need work · ${Object.keys(EX || {}).length - v.filter(m => m.verdict).length} not marked`;
+}
+function render() {
+  $('list').innerHTML = Object.entries(EX).map(([id, e]) => {
+    const n = NODES[id], m = marks[id] || {};
+    const src = allParas(n).map(p => `<div class="pair"><div class="sent">${esc(e.paras[p] || '(no sentence)')}</div><p><span class="pg">p. ${S1.paras[p][1]}</span>${esc(S1.paras[p][0])}</p></div>`).join('');
+    return `<section data-id="${id}">
+      <div class="path">${esc(pathOf(id))} · p. ${n.page}</div>
+      <div class="title">${esc(n.title)}</div>
+      <div class="tldr">${esc(e.tldr)}</div>
+      <details><summary>the filing's text, ${allParas(n).length} paragraphs, each with its sentence</summary><div class="src">${src}</div></details>
+      <div class="verdict">
+        <button type="button" data-v="good" class="${m.verdict === 'good' ? 'on' : ''}">good</button>
+        <button type="button" data-v="work" class="${m.verdict === 'work' ? 'on' : ''}">needs work</button>
+        <textarea placeholder="what's off?">${esc(m.note || '')}</textarea>
+      </div></section>`;
+  }).join('');
+  tally();
+}
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]');
+  if (!b) return;
+  const id = b.closest('section').dataset.id;
+  marks[id] = { ...marks[id], verdict: marks[id]?.verdict === b.dataset.v ? null : b.dataset.v };
+  b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === marks[id].verdict));
+  save();
+});
+$('list').addEventListener('input', e => {
+  if (!e.target.matches('textarea')) return;
+  const id = e.target.closest('section').dataset.id;
+  marks[id] = { ...marks[id], note: e.target.value };
+  save();
+});
+$('copy').onclick = async () => {
+  const lines = Object.keys(EX).filter(id => marks[id]?.verdict || marks[id]?.note).map(id =>
+    `${id} (${NODES[id].title.slice(0, 70)}): ${marks[id].verdict || 'no mark'}${marks[id].note ? ': ' + marks[id].note : ''}`);
+  try { await navigator.clipboard.writeText(lines.join('\n') || 'no feedback yet'); $('copied').style.opacity = 1; setTimeout(() => $('copied').style.opacity = 0, 1200); } catch {}
+};
+(async () => {
+  let picks;
+  [S1, EX, picks] = await Promise.all([fetch('../../reader/s1.json').then(r => r.json()), fetch('paratldr.json').then(r => r.json()), fetch('paratldr25.json').then(r => r.json())]);
+  // the 25 reviewed by hand, unless the address ends in ?all
+  if (location.search !== '?all') EX = Object.fromEntries(Object.keys(picks).map(id => [id, EX[id]]));
+  else document.querySelector('h1').textContent = `All ${Object.keys(EX).length} sections: TLDRs built from their paragraphs`;
+  index(S1.root, null);
+  render();
+})();
+</script>
+</body>
+</html>

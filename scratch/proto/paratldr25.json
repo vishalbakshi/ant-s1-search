@@ -1,0 +1,350 @@
+{
+ "s35": {
+  "paras": {
+   "p220": "Anthropic says that building better Claude models has so far required ever larger amounts of compute, the specialized chips in data centers that train and run Claude, but more spending on chips may not keep producing proportionally better models.",
+   "p221": "Anthropic competes for scarce chips against larger, richer tech companies that own data centers or chip operations and can outbid it, and some cloud providers it relies on also build rival AI models, so their interests may diverge from Anthropic's.",
+   "p222": "Even with contracts in place, cloud providers such as Amazon, Google or Microsoft decide how much capacity Anthropic actually gets and when; Anthropic has already asked for more than they would provide, and a shortfall could force costlier alternatives or none.",
+   "p223": "Anthropic treats its chips as one shared pool split among research, model training, customers and internal use, and since demand has historically exceeded supply, poor allocation could hurt several areas at once, especially as agent products use far more compute per interaction than they earn.",
+   "p224": "Anthropic locks in most of its chips and data center capacity under multi-year contracts signed well before use, including a chosen mix of chip types, so if its needs shift, the capacity it has may not fit what it must do.",
+   "p225": "Because AI models improve in months, even a short compute shortage could leave Anthropic behind rivals, costing customers, revenue, reputation and researchers who want to work at the frontier, and lost ground may be hard to regain."
+  },
+  "tldr": "Because AI models improve in months, even a brief shortage of compute, the specialized chips in data centers that train and run Claude, could leave Anthropic behind rivals, costing customers, revenue, reputation and researchers. Better models have required more compute, with no guarantee of proportional returns. Richer companies can outbid Anthropic for scarce chips, and cloud providers, some building rival models, decide how much capacity it gets; they have already supplied less than it requested. One chip pool serves research, training, customers and internal use, demand has exceeded supply, agent products use more compute per interaction than they earn, and multi-year contracts fix a chip mix that may not fit changing needs."
+ },
+ "s36": {
+  "paras": {
+   "p226": "Chip makers, cloud providers and data center builders require binding commitments months or years ahead, so Anthropic must forecast its compute needs early and has little room to change those commitments later. Compute means the specialized chips in data centers that train and run Claude.",
+   "p227": "How much compute Anthropic needs depends on research pace, training methods, competitors, customer demand and hardware gains. Anthropic says it has already badly underestimated its needs, which limited products, and new capacity may also arrive before demand does.",
+   "p228": "Anthropic is moving from renting cloud capacity for fixed periods to also leasing its own chips in dedicated data centers built to its specifications, which adds new uncertainties such as construction timing, ramp up, energy, water and supplier performance.",
+   "p229": "Anthropic has signed long-term deals with take-or-pay terms, meaning it pays even if it does not use what it bought; the total amount and its timing (before December 31, 2030, 2031 to 2045, next 12 months) are blank in this draft.",
+   "p230": "Paying these bills depends on rapid revenue growth, yet most revenue is usage-based without long contracts. A missed payment could trigger defaults under its credit agreement and convertible notes, making nearly all its debt due at once and cutting off data center access.",
+   "p231": "Chips Anthropic commits to now could become outdated or overpriced as technology improves, and some financing deals tie it to particular chip suppliers, limiting its ability to switch to newer or better suited hardware if its needs change."
+  },
+  "tldr": "Anthropic must commit to compute, the specialized chips in data centers that train and run Claude, years ahead under binding deals, some take-or-pay, meaning it pays even for unused capacity. Needs depend on research, competitors, demand and hardware gains; Anthropic has already badly underestimated them, limiting products, though capacity could also outrun demand. Leasing its own chips in dedicated data centers adds construction, energy and water risks. Paying requires fast revenue growth, yet most revenue is usage-based; a missed payment could make nearly all its debt due at once and cut off data center access. Committed chips could become outdated or overpriced, and some financing deals tie Anthropic to particular suppliers."
+ },
+ "s39": {
+  "paras": {
+   "p240": "Running the data centers that train and run Claude takes huge amounts of electricity, and the power grid cannot expand fast enough to meet demand, which raises prices; Anthropic has publicly promised to cover electricity price increases its data centers cause for consumers.",
+   "p241": "Anthropic and its data center partners need utilities and regulators to approve grid connections and rates, and those parties can delay, refuse, reassign capacity, or demand Anthropic pay more of the grid upgrade costs, which could raise costs or stall projects.",
+   "p242": "Building power plants and transmission lines is expensive and slow, depends on interest rates and available financing, and Anthropic sometimes bears those costs directly; newer energy sources and cooling water may also be scarce or costly.",
+   "p243": "Anthropic competes for power and well-powered sites with large cloud providers such as Amazon, Google or Microsoft, crypto miners and others, and some planned sites will run on their own natural gas generators, leaving Anthropic paying for gas price swings and competing for pipeline capacity.",
+   "p244": "Anthropic could fail to secure gas supply for a planned site, face fuel disruptions once running, and pays fuel costs with no cap, while wholesale electricity prices can spike sharply in ways it cannot control.",
+   "p245": "Data centers have sparked local opposition and complex, overlapping regulation, and Anthropic has already made voluntary commitments, such as paying for grid upgrades and new power, that have raised its costs and may become industry requirements; hotter climates may also raise cooling costs."
+  },
+  "tldr": "Anthropic's data centers need more electricity than the grid can add quickly, pushing prices up; Anthropic has publicly promised to cover increases it causes for consumers. Utilities and regulators can delay connections or shift grid upgrade costs onto Anthropic, and new plants and power lines are expensive and slow to build. Anthropic competes with cloud providers and crypto miners for power, and its planned on-site gas generators bring supply risk and uncapped fuel costs, while wholesale power prices can spike. Local opposition, overlapping regulation, scarce cooling water and hotter climates add costs, and its voluntary pledges to fund grid upgrades and new power have already raised costs and may become industry rules."
+ },
+ "s55": {
+  "paras": {
+   "p349": "No single customer made up more than 10% of Anthropic's revenue in the nine months ended September 30, 2026, but the top five made up about 25%, and many can cut or stop spending at any time because they lack long-term contracts.",
+   "p350": "Anthropic expects to keep relying on a small group of customers for a large share of revenue, possibly more so for some, and which customers are largest may change often as AI uses develop.",
+   "p351": "Sales through cloud providers' marketplaces (CSPs such as Amazon, Google or Microsoft, which bill customers and pass payment to Anthropic after fees) grew from about 11% of revenue in 2023 to 48% in the first half of 2026, so losing or disrupting one could cut revenue and delay cash.",
+   "p352": "Anthropic lists reasons it might fail to keep or grow revenue from its biggest customers.",
+   "p353": "Large customers could build their own AI models and stop buying from Anthropic.",
+   "p354": "Customers could rework their systems to need less of Anthropic's services, with little warning, and decline to renew or expand purchases.",
+   "p355": "Changes Anthropic makes to its products might not fit what customers want and could damage their trust.",
+   "p356": "Some customers also work with, or are themselves, competitors of Anthropic, which can steer their buying decisions away from it.",
+   "p357": "Customers that depend heavily on Anthropic may deliberately reduce that dependence by adding or switching to other providers.",
+   "p358": "Many young, fast-growing customers rely on venture capital, so if their funding dries up or becomes more expensive, they may cut or stop spending with Anthropic.",
+   "p359": "If a top customer cuts spending or leaves and Anthropic cannot make up the difference elsewhere, its results would suffer; the filing points to separate sections on risks of selling to large businesses and governments."
+  },
+  "tldr": "Anthropic relies on a few customers and expects that to continue: none exceeded 10% of revenue in the nine months ended September 30, 2026, but the top five made up about 25%, and many lack long-term contracts and can cut spending anytime. Sales through cloud providers such as Amazon, Google or Microsoft, which bill customers and pass on payment after fees, rose from about 11% of revenue in 2023 to 48% in the first half of 2026, so losing one could cut revenue and delay cash. Big customers might build their own models, need less from Anthropic, dislike product changes, favor rivals, switch providers, or lose venture funding; unreplaced losses would hurt results."
+ },
+ "s56": {
+  "paras": {
+   "p360": "As of June 30, 2026, Anthropic owed $6.2B, all in notes held by Amazon that can turn into stock. It has guaranteed a March 2026 Broadcom chip lease and may borrow up to $42.0B more to pay for it.",
+   "p361": "Converting these notes into Class N shares at the IPO will dilute existing holders by an amount the filing leaves blank; any Amazon balance blocked by its ownership cap converts in later quarters or is repaid in cash at maturity.",
+   "p362": "Repaying debts such as the A&R Credit Agreement loan depends on future results. A shortfall could force asset sales or costly new funding, and the loan and Broadcom note terms limit further borrowing, asset sales, mergers and dividends.",
+   "p363": "The A&R Credit Agreement loan has a floating interest rate, so if market rates rise Anthropic pays more interest on the same borrowing, leaving less cash for investments, acquisitions and partnerships.",
+   "p364": "This introduces a list of further ways the debt and other financial commitments could hurt Anthropic.",
+   "p365": "The debt would make Anthropic more exposed to downturns in the economy, its industry, competition or government regulation in the U.S. and abroad.",
+   "p366": "The debt would leave Anthropic less room to change plans when its business or the AI industry shifts.",
+   "p367": "Competitors with less debt or with fixed interest rates could have an advantage over Anthropic.",
+   "p368": "Existing debt could make it harder for Anthropic to borrow more for acquisitions, daily operations and other needs.",
+   "p369": "The debt could make it harder or less appealing for another company to buy Anthropic.",
+   "p370": "Any of these effects could hurt Anthropic's results, and taking on more debt would make all of these risks larger.",
+   "p371": "If Anthropic breaks its loan conditions, some tied to operating and performance measures, or misses payments, lenders could demand full repayment at once and seize pledged collateral. Noteholders could also demand immediate payment, and Anthropic might lack the cash to pay."
+  },
+  "tldr": "As of June 30, 2026, Anthropic owed $6.2B in Amazon notes convertible into stock and had guaranteed a March 2026 Broadcom chip lease, backed by up to $42.0B more borrowing. Converting the notes into Class N shares at the IPO dilutes holders by an amount the filing leaves blank; balances blocked by Amazon's ownership cap convert later or are repaid in cash at maturity. Repaying the A&R Credit Agreement loan depends on future results. Its floating rate rises with markets, and loan and Broadcom note terms limit borrowing, asset sales, mergers and dividends. The debt deepens exposure to downturns, favors less indebted rivals and deters buyers. Defaults could trigger immediate repayment demands and collateral seizure."
+ },
+ "s63": {
+  "paras": {
+   "p414": "Anthropic has lost money every year, including $42.0B in 2025 and $80.7B in the first half of 2026; most of that ($34.3B and $72.4B) reflects its rising valuation increasing what its convertible notes are worth.",
+   "p415": "Anthropic says it has spent heavily to grow and will keep doing so, in the following areas.",
+   "p416": "The first area is securing compute, meaning the specialized chips in data centers that train and run Claude.",
+   "p417": "Anthropic keeps spending on research to stay at the leading edge of AI models and to add new features to its products.",
+   "p418": "Anthropic is expanding its sales and marketing efforts.",
+   "p419": "Anthropic is hiring more employees.",
+   "p420": "Anthropic is expanding its operations in multiple countries and regions.",
+   "p421": "Anthropic is growing its administrative functions, such as finance, legal and human resources.",
+   "p422": "Anthropic must pay to comply with current and changing rules on AI, data protection, privacy and security.",
+   "p423": "Anthropic spends on AI safety work, including testing, monitoring and reducing risks from its models.",
+   "p424": "Being a public company brings extra costs, such as reporting and compliance.",
+   "p425": "Anthropic also bears the cost of lawsuits and other legal proceedings.",
+   "p426": "Anthropic has signed purchase and lease commitments, as of and after September 30, 2026, whose total is left blank in this draft; these could raise costs sharply and may not produce matching revenue growth.",
+   "p427": "Employee stock grants (RSUs) become an expense when the IPO happens; measured at June 30, 2026, that means $2.9B at once and $23.7B over about 2.1 years, plus $3.1B for other awards and more for new grants.",
+   "p428": "If revenue does not grow faster than rising costs, Anthropic may keep losing large amounts of money and may never become consistently profitable."
+  },
+  "tldr": "Anthropic has lost money every year: $42.0B in 2025 and $80.7B in the first half of 2026, mostly ($34.3B and $72.4B) because its rising valuation increased what its convertible notes are worth. It will keep spending on compute (chips that train and run Claude), research, sales, staff, expansion abroad, administration, compliance, AI safety, public company costs and lawsuits. Purchase and lease commitments (total not yet stated) could sharply raise costs without matching revenue. Employee stock grants become an expense at the IPO: measured at June 30, 2026, $2.9B at once and $23.7B over about 2.1 years, plus $3.1B for other awards. Unless revenue outpaces costs, Anthropic may never be consistently profitable."
+ },
+ "s85": {
+  "paras": {
+   "p576": "Courts have not yet settled whether training AI on copyrighted material is legal \"fair use,\" so a loss in any lawsuit, including one against another AI company, could force Anthropic to pay for licenses, stop distributing models, or retrain them at great cost."
+  },
+  "tldr": "Courts have not yet decided whether training AI on copyrighted material counts as legal \"fair use,\" so a loss in any lawsuit, even one brought against another AI company, could force Anthropic to pay for licenses, stop distributing its models, or retrain them at great cost."
+ },
+ "s100": {
+  "paras": {
+   "p635": "Anthropic's models, platform and apps fall under U.S. export rules run by the Commerce Department, and sometimes the State Department's weapons rules (ITAR); because the models and the rules both keep changing, which rules apply is uncertain, and some access may need government permission, even for certain foreign nationals inside the U.S.",
+   "p636": "Because Anthropic's products use encryption to protect data, and future models might be able to write software that is itself export controlled, more of its products could need government permission before being sent or offered abroad.",
+   "p637": "Most of Anthropic's products can be exported without a license, but in June 2026 the Commerce Department restricted the Fable 5 and Mythos 5 models worldwide, so Anthropic shut them off for all customers until safeguards were updated and the restrictions lifted, and similar actions could recur, last longer, and cost customers and market share.",
+   "p638": "U.S. and foreign sanctions bar dealings with certain people and countries and can change with little notice, and U.S. rules on technology tied to designated adversary countries could limit which suppliers Anthropic can use for its data centers and chips, raising costs or delaying projects.",
+   "p639": "Anthropic blocks access from certain countries by internet address, screens some customers and vendors against restricted lists, and writes compliance terms into contracts, but these controls have failed before, it has already reported violations to authorities itself, and outsiders have already gotten around its controls.",
+   "p640": "If Anthropic breaks export or sanctions rules, it could face criminal or civil penalties, large fines, loss of export rights, exclusion from U.S. government contracts and bad press, and fighting any investigation would be costly and distracting for management.",
+   "p641": "If foreign customers use Anthropic less or Anthropic is limited in selling abroad, revenue from countries where it cannot operate could fall and hurt the business.",
+   "p642": "Anthropic could also suffer reputational damage, investigations or penalties if its partners, vendors, customers or contractors break export or sanctions rules, or if it fails to get them to commit contractually to follow those rules.",
+   "p643": "Violations, or even apparent violations, could cost Anthropic the right to sell to the U.S. government and other public bodies, and the work of checking compliance itself can slow down or lose individual deals.",
+   "p644": "Other countries also restrict encryption and technology trade, as shown by the sanctions placed on Russia, Belarus and parts of Ukraine after Russia's invasion, and new or wider rules could reduce foreign use of Anthropic's products, slow expansion and lower revenue."
+  },
+  "tldr": "In June 2026 the U.S. Commerce Department restricted Anthropic's Fable 5 and Mythos 5 models worldwide, so Anthropic shut them off for all customers until the restrictions lifted; such actions could recur and cost customers. U.S. export rules, sometimes including weapons rules, cover its products, and encryption and future software-writing abilities could require more government licenses, even for some foreign nationals in the U.S. Rules on adversary-linked technology could limit chip and data center suppliers. Anthropic's controls have already failed, it has reported violations itself, and outsiders have evaded them. Violations by Anthropic or its partners could bring fines, criminal penalties and lost government contracts. Compliance checks slow deals, and foreign trade limits like those on Russia could cut revenue."
+ },
+ "s114": {
+  "paras": {
+   "p696": "Through its Class T shares, the LTBT, a trust run by Trustees, elects a majority of Anthropic's board indefinitely unless the board and Trustees or stockholder groups change that; Trustees get only fixed cash pay and cannot own Anthropic stock.",
+   "p697": "The Founder LLC, an entity in which the cofounders hold interests, gets 50.1% of all stockholder votes, including on directors the LTBT does not elect, until shares are redeemed or a transition triggered by fewer than three remaining founders ends.",
+   "p698": "Because these votes do not come from owning shares and cannot be diluted, the LTBT and founders can outvote public investors for the foreseeable future and may put Anthropic's mission and affected people ahead of stockholders' financial returns."
+  },
+  "tldr": "Two groups can outvote Anthropic's public investors for the foreseeable future, because their voting power does not come from owning shares and cannot be diluted, and they may put Anthropic's mission and affected people ahead of stockholders' financial returns. The LTBT, a trust whose Trustees receive only fixed cash pay and cannot own Anthropic stock, uses special Class T shares to elect a majority of the board indefinitely, unless the board and Trustees or stockholder groups change that. The Founder LLC, in which the cofounders hold interests, gets 50.1% of all stockholder votes, including on the other directors, until its shares are redeemed or a transition triggered by fewer than three remaining founders ends."
+ },
+ "s118": {
+  "paras": {
+   "p707": "Anthropic has already made, and expects to keep making, decisions that weigh stockholder returns against its mission and affected people, such as slowing model development for safety or limiting uses, which could lower profits and make the stock less attractive to return-focused investors.",
+   "p708": "Anthropic has already given up revenue by banning use of its models for fully autonomous weapons and mass surveillance, releasing Mythos only as a limited research preview through Project Glasswing, and skipping image and video generation to save computing chips for research and safety.",
+   "p709": "Because of these choices, Anthropic may pass up revenue, customers and growth that a company run only to maximize stockholder value would pursue.",
+   "p710": "Delaware law obligates Anthropic's directors to weigh the mission and other stakeholders, not just stockholders, so conflicts may not be resolved in investors' favor, and because courts have rarely ruled on this, directors' duties and investors' legal remedies remain uncertain.",
+   "p711": "Being a PBC makes Anthropic harder to take over or pressure through activist investors, so stockholders may have fewer chances to profit from an acquisition, and the board may find it easier to reject a hostile bid even when it would pay investors the most.",
+   "p712": "Anthropic plans to spend a meaningful and growing share of its resources on public benefit work, including the Initial Public Benefit Issuance and future Public Benefit Issuances, which have already been substantial and may reduce revenue, raise expenses and bring no measurable return to stockholders."
+  },
+  "tldr": "Anthropic, a public benefit corporation (PBC), has already made and will keep making choices that weigh its mission against stockholder returns, such as slowing development for safety, which may cut profits and deter return-focused investors. It has already forgone revenue by banning fully autonomous weapons and mass surveillance uses, limiting Mythos to a research preview, and skipping image and video generation to save chips for research and safety. Delaware law requires directors to weigh other stakeholders too, and few rulings leave investor remedies uncertain. PBC status deters takeovers and activists, easing rejection of even top-paying hostile bids. Public benefit spending, already substantial, will grow and may return nothing measurable to stockholders."
+ },
+ "s124": {
+  "paras": {
+   "p730": "The IPO price is set by negotiation among Anthropic, selling stockholders and the banks running the sale, not by the market, so the price after listing can swing widely for reasons Anthropic cannot control, and investors can lose some or all of their money.",
+   "p731": "Swings in the stock market as a whole, driven by economic worries or a sour mood among investors, can move Anthropic's share price.",
+   "p732": "Technology stocks as a group tend to swing sharply, and Anthropic's shares can be pulled along with them.",
+   "p733": "Shortages of compute, meaning the specialized chips in data centers that train and run Claude, along with shifting trade rules, tariffs and retaliation by other countries, can move the share price.",
+   "p734": "How other technology companies, especially AI companies, perform and how investors value them can change how investors value Anthropic.",
+   "p735": "Sales of shares by Anthropic or its existing holders, and even the approach of dates when insiders are first allowed to sell, can push the price down.",
+   "p736": "Rumors and speculation about Anthropic or its industry can move the stock whether or not they are true.",
+   "p737": "If Wall Street analysts stop covering Anthropic, lower their forecasts, or see Anthropic miss what they or investors expected, the share price can fall.",
+   "p738": "A data breach, or even the perception of one, could hurt the share price.",
+   "p739": "Any forecasts Anthropic publishes, changes to them, or failure to hit them can move the stock.",
+   "p740": "Outside data published about Anthropic or competitors can move the price even when that data is wrong.",
+   "p741": "New model, platform or app launches by Anthropic or its rivals can shift how investors value the shares.",
+   "p742": "How the public reacts to Anthropic's announcements and regulatory filings can move the price.",
+   "p743": "Changes in how many shares trade, or in how many shares are freely available to the public, can make the price more volatile.",
+   "p744": "Investors betting on a price decline, by short selling the shares or related contracts, can put downward pressure on the stock.",
+   "p745": "Actual or expected changes in Anthropic's financial results can move the share price.",
+   "p746": "News about Anthropic's business, its competitors, or the overall competitive picture, whether real or expected, can affect the stock.",
+   "p747": "Changes in expectations about how large or fast growing Anthropic's potential markets will be can change its valuation.",
+   "p748": "Issuing new Class A shares, including when Class N shares convert to Class A upon certain transfers, adds to supply and can weigh on the price.",
+   "p749": "Lawsuits, regulatory actions or government investigations involving Anthropic, its rivals or the AI industry can hurt the stock.",
+   "p750": "Disputes over patents, copyrights or other intellectual property can affect the share price.",
+   "p751": "Acquisitions or similar deals, announced or completed, by Anthropic or its competitors can move the stock.",
+   "p752": "New laws or new readings of existing laws that apply to Anthropic can affect how investors value it.",
+   "p753": "Government enforcement or other official actions aimed at Anthropic's models, platform and apps can push the price down.",
+   "p754": "Changes in accounting rules can alter Anthropic's reported results and move the share price.",
+   "p755": "Wars, terrorism, pandemics and the responses to them can cause sharp price swings.",
+   "p756": "Founders, board members, executives or other key people joining or leaving can affect investor confidence in the stock.",
+   "p757": "Weak economic conditions and slow or shrinking growth in Anthropic's markets can push the share price down.",
+   "p758": "A broad loss of confidence in tech stocks, or trouble at other AI companies, can drag Anthropic's price down even when its own business is fine, so Anthropic cannot promise investors they can sell when they want or at a good price.",
+   "p759": "Companies whose stock swings sharply are often sued by shareholders in class actions, and such suits could cost Anthropic heavily and distract its management from running the business."
+  },
+  "tldr": "Anthropic's IPO price is negotiated by Anthropic, selling stockholders and its banks, not set by the market, so the shares may swing widely afterward and investors can lose some or all of their money. Triggers include market and tech-stock swings, trouble at other AI companies, shortages of compute (specialized chips that train and run Claude), tariffs, share sales by Anthropic or insiders, short selling, analyst downgrades, missed forecasts, rival launches, lawsuits, new laws, wars and departures of key people. Prices can fall even if the business is fine, so selling when or at the price investors want is not assured, and volatile stocks often draw costly shareholder class actions."
+ },
+ "s23": {
+  "paras": {
+   "p129": "This introduces a table comparing the five classes of Anthropic stock that will exist after the IPO, each with different voting, transfer, and payout rights.",
+   "p130": "Only Class A and nonvoting Class N share in dividends and sale proceeds, while control sits elsewhere: Class F, held through a Founder LLC, carries 50.1% of votes, and Class T, tied to Anthropic's LTBT trust, elects most directors.",
+   "p131": "Fuller details of how these stock classes work, including control, voting and redemption terms, appear in the filing's \"Description of Capital Stock\" section."
+  },
+  "tldr": "After the IPO, Anthropic will have five classes of stock with different voting, transfer and payout rights, and the people who share in profits are not the ones who hold control. Only Class A and nonvoting Class N shares receive dividends and proceeds if the company is sold. Class F shares, held through a Founder LLC, carry 50.1% of the votes, and Class T shares, tied to Anthropic's LTBT trust, elect most of the board of directors. The filing's \"Description of Capital Stock\" section gives fuller details on how these classes work, including their control, voting and redemption terms."
+ },
+ "s133": {
+  "paras": {
+   "p814": "The filing leaves blank how much money Anthropic expects to receive from selling new shares, after paying bank fees and offering costs; money from shares sold by existing holders goes to them, not to Anthropic.",
+   "p815": "This shows how Anthropic's take would change if the share price or the number of shares sold moves up or down, but the dollar figures have not yet been filled in.",
+   "p816": "Anthropic says the IPO is meant to add cash and flexibility, create a public market where its shares can trade, and give existing shareholders an orderly way to sell.",
+   "p817": "Anthropic plans to spend the money broadly, including on compute (the specialized chips in data centers that train and run Claude) and on hiring, and may buy other companies, though no major deals are agreed.",
+   "p818": "Part of the proceeds will pay taxes owed when employee stock awards (RSUs, promised shares granted as pay) convert into actual shares at the IPO, with the amount and tax rate still left blank.",
+   "p819": "Anthropic says it cannot pin down exactly how it will spend the money, so management will have wide latitude, and until then it may hold the cash in safe, short-term, interest-paying investments."
+  },
+  "tldr": "Anthropic plans to use its IPO money broadly, including on compute (the specialized chips in data centers that train and run Claude), hiring and possibly acquisitions, though no major deals are agreed, and it says management will have wide latitude because it cannot pin down exact uses. Anthropic says the IPO is meant to add cash and flexibility, create a public market for its shares and give existing shareholders an orderly way to sell. The filing leaves blank how much Anthropic expects to receive after bank fees and offering costs, and how that would shift with the share price or number of shares sold; money from shares sold by existing holders goes to them. Part of the proceeds will pay taxes owed when employee stock awards (RSUs, promised shares granted as pay) convert into actual shares at the IPO, with the amount and tax rate also blank. Until the money is spent, Anthropic may hold it in safe, short-term, interest-paying investments."
+ },
+ "s136": {
+  "paras": {
+   "p839": "People buying Class A shares in the IPO will pay more per share than the company's net physical and financial assets (assets minus debts, excluding intangibles) are worth per share, and that gap is called dilution.",
+   "p840": "Net tangible book value per share counts only Class A and Class N shares because Classes T, F and E carry no economic rights; the actual dollar figures as of September 30, 2026 are still blank in this draft.",
+   "p841": "After the IPO sale and paying tax withholding on employee stock units, existing holders see their per share book value rise while new IPO buyers immediately own less book value per share than they paid; amounts are not yet filled in.",
+   "p842": "This table walks step by step from the IPO price to the dilution new investors absorb per share, but all of its figures are still blank in this draft.",
+   "p843": "The dilution numbers are estimates that will shift with the final IPO price and share count, with each $1.00 price change or 1.0 million share change moving them by amounts not yet disclosed.",
+   "p844": "If the underwriters, the banks running the IPO, buy their full option of extra shares, book value per share and dilution to new investors change to figures not yet given.",
+   "p845": "Introduces a table comparing what existing stockholders paid for their shares in total and on average versus what IPO buyers will pay, as of September 30, 2026, after the listed share conversions.",
+   "p846": "The comparison table of shares, total payment and average price per share for existing holders versus new investors has blank figures in this draft.",
+   "p847": "The comparison ignores shares that current holders are selling in the IPO; those sales will shift ownership toward new investors, by percentages not yet stated.",
+   "p848": "Each $1.00 change in the IPO price, or each 1.0 million share change in shares Anthropic sells, would change the total amount new investors pay by an amount not yet disclosed.",
+   "p849": "The figures assume the underwriters do not buy extra shares; if they buy all of them, the ownership split between existing holders and new investors shifts to percentages not yet given.",
+   "p850": "The post IPO share counts include one share each of Class T and Class F stock and reflect several conversions, but leave out several categories of possible future shares listed next.",
+   "p851": "Excluded are Class A shares that employees and others could buy by exercising stock options outstanding as of September 30, 2026, at an average price not yet disclosed.",
+   "p852": "Also excluded are Class A shares from restricted stock units, promised stock grants, whose time based vesting has not yet been met, even if their IPO related condition will be met.",
+   "p853": "Also excluded are Class A shares Anthropic issued after September 30, 2026 to pay for buying private companies, which means some issuance has already occurred.",
+   "p854": "Also excluded are Class A shares set aside for future grants under Anthropic's employee stock plans, broken out below.",
+   "p855": "This includes shares reserved for when Class N stock issued under the Donation Matching Plan converts into Class A stock.",
+   "p856": "It includes shares reserved under the new 2026 equity plan, which takes effect before the IPO closes.",
+   "p857": "It includes shares remaining under the older 2021 plan, which will roll into the 2026 plan when Anthropic stops making new grants under the 2021 plan.",
+   "p858": "It includes shares reserved for the employee stock purchase plan, which lets employees buy stock, typically at a discount, and takes effect before the IPO closes.",
+   "p859": "The 2026 plan and employee purchase plan grow automatically each year, and the 2026 plan also recycles unused or withheld 2021 plan shares, so the pool of future employee stock can keep expanding.",
+   "p860": "Whenever options are exercised, stock units pay out, or new employee awards are granted, IPO investors will own a smaller share of the company."
+  },
+  "tldr": "IPO buyers of Class A shares will immediately own less in net tangible assets (assets minus debts, excluding intangibles) per share than they paid, a gap called dilution, while existing holders gain. All figures are still blank. Only Class A and N shares count, because Classes T, F and E carry no economic rights. The amounts depend on the final price, the share count and whether the IPO banks buy extra shares. The counts exclude stock options, unvested stock grants, shares already issued after September 30, 2026 to buy private companies, and shares reserved under employee plans, some of which grow automatically each year. Issuing any of these would further dilute IPO investors."
+ },
+ "s141": {
+  "paras": {
+   "p876": "Paying for compute, meaning the specialized chips in data centers that train and run Claude, is Anthropic's largest operating cost, and the company says it now gets more model capability and more revenue out of each dollar spent on it than before.",
+   "p877": "Anthropic defines compute efficiency as getting the most intelligence and revenue per dollar of chips and data centers, and names three areas that drive it, listed next.",
+   "p878": "Anthropic's researchers keep finding ways to train models with less compute, and Claude itself now helps build the next Claude, which the company calls \"closing the loop\" and expects to compound across model generations.",
+   "p879": "Anthropic has cut the compute needed to run its models for customers at a given quality, which matters because demand has consistently exceeded the compute it has, so each saving lets it serve more customers and earn more.",
+   "p880": "Anthropic runs Claude on four chip families from Amazon, Google, NVIDIA and AMD using its own software to shift work to the cheapest suitable hardware, which reduces reliance on any one supplier and, it believes, is hard for rivals to copy.",
+   "p881": "Anthropic's revenue grew 1,368% year over year in the three months ended June 30, 2026, while compute and infrastructure costs grew 300%, and it has already released models including Mythos 5, Fable 5 and Opus 5 and products including Claude Cowork and Claude Design."
+  },
+  "tldr": "Compute, the specialized data center chips that run Claude, is Anthropic's largest operating cost, and it now gets more capability and revenue per dollar: in the three months ended June 30, 2026, revenue grew 1,368% year over year while compute and infrastructure costs grew 300%. Researchers keep cutting training compute, and Claude now helps build the next Claude, gains Anthropic expects to compound. Serving customers needs less compute, letting Anthropic meet more demand, which has outrun supply. Its software routes work across Amazon, Google, NVIDIA and AMD chips to the cheapest fit, limiting supplier reliance. It has already released Mythos 5, Fable 5, Opus 5, Claude Cowork and Claude Design, among others."
+ },
+ "s143": {
+  "paras": {
+   "p886": "Anthropic says it must keep spending heavily on compute, the specialized chips in data centers that train and run Claude, and more of that spending now goes to building its own infrastructure, paid well before it earns revenue, which will consume significant cash for the foreseeable future.",
+   "p887": "Anthropic has begun adding Anthropic Direct, leasing chips itself and placing them in dedicated facilities run for it, alongside cloud contracts, so it can reserve slow-to-build data centers early and delay the costlier chip purchases until its needs are clearer.",
+   "p888": "Anthropic has already signed purchase and lease commitments stretching to 2045, though this draft leaves the total and the near-term amounts blank; much of it is for Anthropic Direct, which lets cheaper long-term capacity replace short-term compute bought during demand spikes.",
+   "p889": "Anthropic plans to pay for these commitments with its revenue, cash, investments, a bank credit line, financing and equity promised by strategic partners, and the money from this IPO, but every dollar amount and the share price are still blank in this draft."
+  },
+  "tldr": "Anthropic must keep spending heavily on compute, the specialized chips in data centers that train and run Claude, and a growing share now goes to building its own infrastructure, paid well before it earns revenue and expected to consume significant cash for the foreseeable future. Alongside cloud contracts, it has begun Anthropic Direct, leasing chips itself in dedicated facilities run for it, so it can reserve slow-to-build data centers early, delay costlier chip purchases until needs are clearer, and replace short-term compute bought during demand spikes with cheaper long-term capacity. It has already signed commitments stretching to 2045, mostly for Anthropic Direct, and plans to fund them with revenue, cash, investments, a bank credit line, partner financing and equity, and IPO proceeds. This draft leaves the totals, near-term amounts and share price blank."
+ },
+ "s243": {
+  "paras": {
+   "p1116": "Anthropic has already agreed to pay Microsoft at least $44.9B from November 2026 to May 2033 whether or not it uses the capacity, and it can only cancel if Microsoft breaches the contract or fails to deliver portions.",
+   "p1117": "Anthropic owes Google at least about $114.5B from April 2026 to July 2033 and must pay any shortfall, plus it expects roughly $125.0B to $150.0B more for Google's TPU chips delivered 2028 to 2031, not counted in the commitments table.",
+   "p1118": "Anthropic has committed to spend at least $110.0B with Amazon from May 2026 to April 2036 regardless of use, must pay any shortfall, and can cancel only if Amazon breaches the contract.",
+   "p1119": "Anthropic agreed to spend up to $120.5B into 2029 with SpaceXAI, formerly xAI, for NVIDIA chip capacity, about $3.1B a month once fully delivered around December 2026, though either side can cancel with 90 days' notice after early 2027.",
+   "p1120": "Anthropic committed to buy AMD Helios chip systems starting in 2027, which it expects to cost more than $20.0B if fully taken, with an option for about as much again, and it cannot cancel unless AMD breaches.",
+   "p1121": "Anthropic agreed to spend up to about $44.6B into 2033 with Nscale for NVIDIA chip capacity, paying only as capacity is delivered, though the deal depends partly on Nscale raising financing for the chips and data centers.",
+   "p1122": "Anthropic agreed to spend about $41.3B into 2034 with Lambda for NVIDIA chip capacity, paying only as delivered, and the largest piece, about $34.9B, can be ended if Lambda fails to secure its data center lease in time."
+  },
+  "tldr": "Anthropic has already signed contracts to buy compute, the specialized chips in data centers that train and run Claude. The three biggest are take-or-pay, meaning Anthropic pays even if it does not use what it bought, and Anthropic can cancel only if the provider breaches. They total at least $44.9B with Microsoft (November 2026 to May 2033), about $114.5B with Google (April 2026 to July 2033) and $110.0B with Amazon (May 2026 to April 2036). Anthropic also expects $125.0B to $150.0B more for Google chips in 2028 to 2031, and over $20.0B for AMD systems from 2027. Deals for NVIDIA chips with SpaceXAI (up to $120.5B), Nscale and Lambda are paid as delivered or can be cancelled."
+ },
+ "s253": {
+  "paras": {
+   "p1157": "Anthropic chose to carry its convertible notes, which are loans that can turn into shares, at their current estimated market value. Any change in that value hits its reported profit or loss, which avoids splitting each note into a debt piece and a stock piece.",
+   "p1158": "Under its 2023 and 2024 note agreements with Amazon and Google, Anthropic also records its promises to issue more convertible notes later as liabilities, valued at current estimated worth, with value changes flowing into reported profit or loss.",
+   "p1159": "To value the notes, Anthropic combines two valuation methods, called CCA and CSE, that weigh how likely each outcome is: conversion into preferred stock or Class N common stock, repayment in cash at maturity, or a premium cash payout if Anthropic is acquired.",
+   "p1160": "These valuations rest on uncertain guesses about the timing and odds of a funding round, IPO, or sale, Anthropic's share value, and how much debt converts versus rolls into new interest-free notes, so reported results can swing materially when assumptions change.",
+   "p1161": "Anthropic issued SAFEs, which are investments that later convert into shares, in 2023 and valued them the same way, but all converted into preferred stock during 2023 and 2024, so none were outstanding afterward and the remaining valuation uncertainty involves the convertible and rollover notes.",
+   "p1162": "This points readers to Note 9 of the financial statements for full details on each convertible note, derivative liability, and SAFE, including their terms, conversions, and balances."
+  },
+  "tldr": "Anthropic carries its convertible notes, loans convertible into shares, at estimated market value rather than splitting them into debt and stock, so value changes flow into reported profit or loss and results can swing materially as assumptions shift. Promises to issue more notes under 2023 and 2024 agreements with Amazon and Google are treated the same way. Values depend on the odds of conversion into preferred or Class N common stock, repayment at maturity, or a premium payout in a sale, and on guesses about deal timing, share value and rollovers into new interest-free notes. 2023 SAFEs, investments that convert into shares, were valued similarly but all became preferred stock by 2024."
+ },
+ "s264": {
+  "paras": {
+   "p1202": "Anthropic says Claude now does much of the work of building the next Claude, including running experiments, preparing training data, testing models and writing code, and that this cycle is speeding up its discovery of compute multipliers, meaning techniques that get more capability from the same chips.",
+   "p1203": "Inside Anthropic, Claude Code, its product that writes and runs software on its own, solved about 90% of hard, loosely defined engineering problems by September 2026, up about 50 points in nine months, and wrote over 90% of September 2026 code contributions.",
+   "p1204": "Between December 31, 2024 and September 30, 2026, Anthropic's staff grew more than five times while quarterly revenue grew 86 times, comparing the quarter ended September 30, 2026 with the quarter ended December 31, 2024.",
+   "p1205": "Anthropic attributes revenue growing much faster than headcount to employees across research, engineering, sales and operations using groups of Claude agents, letting a relatively small workforce do work that would normally need many more people.",
+   "p1206": "Anthropic's own use of Claude, valued at list prices, grew over 250 times from January to September 2026 and since April 2026 has exceeded its monthly payroll costs excluding stock pay, so a large share of compute now goes to internal use that Anthropic expects to keep speeding development.",
+   "p1207": "Anthropic acknowledges that using AI to build better AI could be seriously dangerous if progress speeds up sharply, and says its Responsible Scaling Policy, its internal safety framework, covers monitoring and limiting the risks of AI improving itself."
+  },
+  "tldr": "Anthropic says Claude does much of building the next Claude, speeding discovery of ways to get more capability from the same chips. Claude Code, which writes and runs software on its own, solved about 90% of hard engineering problems by September 2026, up about 50 points in nine months, writing over 90% of September code. From December 2024 to September 2026, staff grew over fivefold and quarterly revenue 86-fold, credited to staff using Claude agents. Internal Claude use, at list prices, grew over 250-fold from January to September 2026, has topped payroll excluding stock pay since April, and absorbs much chip capacity. Anthropic calls AI building AI potentially seriously dangerous, a risk its Responsible Scaling Policy, its safety framework, covers."
+ },
+ "s304": {
+  "paras": {
+   "p1383": "Anthropic used to rent compute (the specialized chips in data centers that train and run Claude) only as a cloud service, but now also buys chips itself and runs them in leased facilities built to its design, called Anthropic Direct; the first facility began operating this year.",
+   "p1384": "Because building a data center takes longer but costs less than the chips inside it, Anthropic can reserve buildings early and wait to commit the bigger money on chips until it knows better what it will need.",
+   "p1385": "Anthropic Direct is built from several kinds of contracts that together add capacity alongside what Anthropic rents from CSPs, meaning cloud providers such as Amazon, Google or Microsoft; the list below describes them.",
+   "p1386": "Anthropic gets its chips, processors and high-bandwidth memory through equipment leases, including the 2026 Lease Arrangement, and places them in data centers that other companies run for it, so it carries lease obligations described elsewhere in the filing.",
+   "p1387": "Partners such as Fluidstack build and run facilities that Anthropic leases, Anthropic also signs leases directly, and some projects rely on financiers or partners guaranteeing the leases, so future growth depends on a small number of willing counterparties.",
+   "p1388": "Each data center needs its own power deal, either from a utility or from generation built on site, and securing that power takes years and large payments committed long before the facility opens.",
+   "p1389": "Anthropic's data centers are mostly in the United States today, and it is seeking capacity in other countries as its customers and research spread internationally."
+  },
+  "tldr": "Anthropic no longer only rents compute (the specialized chips in data centers that train and run Claude) from cloud providers such as Amazon, Google or Microsoft. Through Anthropic Direct it also buys chips and runs them in custom leased facilities, and the first opened this year. Buildings take longer but cost less than chips, so Anthropic reserves sites early and commits to chips later. Equipment leases, including the 2026 Lease Arrangement, supply the chips, housed in sites that partners such as Fluidstack build and run. Some leases rely on guarantors, so growth depends on a few counterparties. Each site's power deal takes years and large early payments. Sites are mostly in the United States, with capacity sought abroad."
+ },
+ "s325": {
+  "paras": {
+   "p1453": "Anthropic says it tries to push competitors to compete on safety rather than speed by sharing research and safety tests, and it notes that two other leading AI labs copied its Responsible Scaling Policy within months of its September 2023 release.",
+   "p1454": "Anthropic backs industry-wide, government-linked rules so AI capability does not outrun safety, says this does not set its own release schedule, and expects to spend at least $1B over five years with Accenture on outside safety reviewers, terms not final.",
+   "p1455": "Anthropic introduces a list of steps it thinks AI companies and governments should take to protect essential systems such as power and water from cyberattacks, including AI-driven ones.",
+   "p1456": "The first step is giving defenders of critical infrastructure, especially those with few resources, careful access to AI models plus money, training and direct help.",
+   "p1457": "Another step is building tools that let organizations see what is happening inside their systems and defend them.",
+   "p1458": "Another step is making sure AI agents, meaning AI systems that take actions on their own, can be identified and held responsible for what they do.",
+   "p1459": "Another step is sharing proven methods for constantly watching systems for attacks.",
+   "p1460": "Another step is paying for approved hacking tests, quietly reporting flaws to the owners, and confirming that the flaws actually get fixed.",
+   "p1461": "The last step is sharing tools, response guides and threat analyses with governments, security partners and the volunteers who maintain free public software.",
+   "p1462": "Anthropic has already committed up to $100 million to cyberdefense through Project Glasswing and expects to spend significantly more, but warns that future amounts and timing are undecided and the efforts may not work.",
+   "p1463": "Anthropic argues that its very fast revenue growth shows a company can make money while treating safety as a top priority, which is the company's own claim rather than a measured result."
+  },
+  "tldr": "Anthropic has already committed up to $100 million to cyberdefense through Project Glasswing and expects more, though amounts, timing and results are uncertain; it expects to spend at least $1B over five years with Accenture on outside safety reviewers, terms unsettled. It shares safety research to push rivals toward safety over speed; two leading labs copied its September 2023 Responsible Scaling Policy within months. It backs government-linked industry rules, which do not set its release schedule. To protect power, water and other essential systems, it urges aid for under-resourced defenders, monitoring tools, accountable AI agents, paid hacking tests with verified fixes, and threat sharing with governments and open-source volunteers. It claims fast revenue growth shows safety and profit can coexist."
+ },
+ "s346": {
+  "paras": {
+   "p1530": "The LTBT has five Trustee seats, one currently vacant; Trustees pick and remove each other with 30 days' notice to Anthropic's NGC board committee, serve unlimited one-year terms, and so far have been chosen together with company executives.",
+   "p1531": "Dr. Neil \"Buddy\" Shah has chaired the LTBT since June 2023, will also help run the new Anthropic Public Benefit Fund, and has led the Clinton Health Access Initiative since June 2022 after senior roles at GiveWell and IDinsight.",
+   "p1532": "Anthropic says Dr. Shah was chosen for his background in global health, measuring the real impact of programs, and judging the long-term social effects of large initiatives.",
+   "p1533": "Richard Fontaine, a Trustee since April 2025, has led the Center for a New American Security, a bipartisan national security research group, since February 2019, after years as Senator John McCain's foreign policy advisor and in government security roles.",
+   "p1534": "Anthropic says Mr. Fontaine was chosen for his foreign policy and national security experience, so the LTBT can weigh how growing AI capabilities affect risks between countries.",
+   "p1535": "Dr. Ben S. Bernanke, who chaired the Federal Reserve from February 2006 to January 2014 and won the 2022 Nobel Prize in Economics, joined as a Trustee in June 2026 and has been at the Brookings Institution since 2014.",
+   "p1536": "Anthropic says Dr. Bernanke was chosen for his knowledge of the economy, financial systems and governance, and his experience running major institutions through crises when the whole system was at risk.",
+   "p1537": "Dr. Christopher Stubbs, a Harvard physics and astronomy professor who advised Harvard's arts and sciences faculty on AI from 2024 to 2026 and advises the U.S. government on national security through JASON, became a Trustee in October 2026.",
+   "p1538": "Anthropic says Dr. Stubbs was chosen for his physics expertise, his work applying AI to science and education, and his experience leading large scientific projects across universities, government, and national laboratories."
+  },
+  "tldr": "The LTBT has five Trustee seats, one vacant. Trustees choose and remove one another on 30 days' notice to an Anthropic board committee, serve unlimited one-year terms, and so far have been picked together with company executives. Chair Dr. Neil \"Buddy\" Shah, in the role since June 2023, is a global health expert who leads the Clinton Health Access Initiative and will help run the new Anthropic Public Benefit Fund. Richard Fontaine, Trustee since April 2025 and head of the Center for a New American Security, brings national security experience. Former Federal Reserve chair and 2022 Nobel laureate Dr. Ben S. Bernanke joined in June 2026, and Harvard physicist Dr. Christopher Stubbs joined in October 2026."
+ },
+ "s353": {
+  "paras": {
+   "p1573": "This table explains how Anthropic's two special control classes can end. Trust control (Class T) ends only if that stock is redeemed or eliminated with trustee-level approval. Founder control (Class F) ends if that stock disappears or fewer than three founders remain.",
+   "p1574": "When the trustees support ending their own class, 80% of Anthropic's board and 80% of the trustees must approve. The founder transition starts after fewer than three qualifying founders remain for 90 straight days, and founders can be removed from the founder group in several ways.",
+   "p1575": "Without trustee support and while founder stock exists, ending trust control needs founders, Class E holders and Class A holders all to agree. Founders leave the group by resigning, dying, competing, falling below 2% of their original Class A holdings, or taking approved leave.",
+   "p1576": "This is a repeated column heading for the table comparing how trust control and founder control end.",
+   "p1577": "If founder stock is gone and the trustees object, 85% of all Class A shares can end trust control. It never ends automatically or with time, and once ended it cannot be reversed. Removing a founder for incapacity or cause requires a formal determination the founder can contest.",
+   "p1578": "Before a founder can be removed for incapacity, cause or low ownership, a majority of the other founders must send written notice through the Founder LLC, the entity holding the founders' stock.",
+   "p1579": "If a founder dies or becomes incapacitated within ten years after the offering, a replacement can join and count toward the three founders needed to keep founder control, but only until that tenth anniversary.",
+   "p1580": "Once founder control ends, it cannot be extended, delayed or waived.",
+   "p1581": "Until trust control ends, the LTBT elects a board majority. Founder stock carries 50.1% of all votes, so if trust control ends first, the founders control every shareholder vote. Ordinary Class A shareholders gain full control only after both classes end.",
+   "p1582": "This points readers to the risk factors and capital stock description for more detail on Anthropic's governance structure."
+  },
+  "tldr": "Class A shareholders gain full control of Anthropic after both special classes end. Until trust control (Class T) ends, the LTBT elects a board majority; founder stock (Class F) holds 50.1% of votes, so founders control every shareholder vote if trust control ends first. Irreversibly ending trust control needs 80% of board and trustees or, over trustee objection, founders, Class E and Class A holders, or 85% of Class A shares once founder stock is gone. Founder control ends permanently if fewer than three founders remain for 90 days. Founders leave by resigning, dying, competing, holding under 2% of original shares, or approved leave; replacements count only until the offering's tenth anniversary."
+ },
+ "s482": {
+  "paras": {
+   "p1966": "Almost everyone who already owns Anthropic stock, including all directors and officers, has agreed not to sell or transfer their shares for a set period after the IPO, which limits how many shares can hit the market early.",
+   "p1967": "Directors who are not founders, officers, and some current and former employees and consultants can start selling at whichever comes first: early on the second full trading day after Anthropic releases its first-quarter results, or 180 days after the prospectus date.",
+   "p1968": "A group of existing stockholders holds a percentage of the company that the filing leaves blank for now. This group gets the same release timing as the previous group: shortly after the first-quarter results, or after 180 days.",
+   "p1969": "A second group of stockholders, whose ownership percentage is also still blank, must wait longer. They can sell after the third-quarter results are released or 365 days after the prospectus date, whichever comes first.",
+   "p1970": "Anthropic's seven co-founders are held to the longer restriction. They cannot sell until shortly after the third-quarter results are released or 365 days after the prospectus date, whichever comes first.",
+   "p1971": "These restriction periods can also end early in stages under automatic release dates explained elsewhere in the filing, so some shares may become sellable before the outer deadlines.",
+   "p1972": "Each agreement has exceptions that let some shares be transferred even while the restriction is in force.",
+   "p1973": "The full details of the release dates and exceptions appear in the Underwriting section. Investors should expect selling by existing holders to rise as each restriction ends."
+  },
+  "tldr": "Almost all existing Anthropic stockholders, including every director and officer, have agreed not to sell their shares for a set period after the IPO, limiting how many shares can reach the market early. Non-founder directors, officers, some current and former employees and consultants, and one stockholder group can sell after first-quarter results are released or 180 days after the prospectus date, whichever comes first. Anthropic's seven co-founders and a second group must wait until after third-quarter results or 365 days. Both groups' ownership percentages are still blank. Staged automatic early releases and exceptions may free some shares sooner, and selling by existing holders is expected to rise as each restriction ends."
+ },
+ "s636": {
+  "paras": {
+   "p2541": "Anthropic is regularly involved in lawsuits and legal claims, and the paragraphs that follow list the significant ones.",
+   "p2542": "Authors sued Anthropic in August 2024 for using their books to train Claude; Anthropic agreed to a $1.5B settlement, approved in July 2026, paid $300 million in 2025, and still owed $1.2B as of June 30, 2026.",
+   "p2543": "Music publishers led by Concord sued in October 2023, claiming Anthropic copied and spread song lyrics; the case awaits a ruling after an October 21, 2026 hearing, and Anthropic denies wrongdoing.",
+   "p2544": "Anthropic faces four Canadian copyright suits: two author class actions filed in 2025 over books used for training, plus news publisher suits filed in July and October 2026 over articles copied from their websites, all of which it disputes.",
+   "p2545": "Reddit sued in June 2025 over Anthropic's use of Reddit data to build its models; in September 2026 a court cut the case down to contract and unfair competition claims, which Anthropic contests.",
+   "p2546": "During 2026, major music publishers including Universal, Sony, Warner Chappell and Concord filed new federal suits claiming Anthropic copied song lyrics and compositions both to train its models and in what the models produce.",
+   "p2547": "These newer music cases add claims of illegal downloading and bypassing copy protections, name two Anthropic executives personally, seek unspecified damages and court orders, and are at an early stage.",
+   "p2548": "Anthropic also faces several proposed class actions claiming it used misleading advertising to sell Claude subscription plans, which it denies.",
+   "p2549": "Some authors and publishers declined the $1.5B Bartz settlement and are suing Anthropic separately over the same book training claims, so that exposure is not fully resolved.",
+   "p2550": "Many authors, publishers, websites and trade groups have complained about how Anthropic collected and used their content, some asking for removal from training data, and Anthropic expects more such complaints that could become lawsuits.",
+   "p2551": "Government bodies, including the Federal Trade Commission and state attorneys general, sometimes investigate or request information from Anthropic about consumer protection, privacy and the safety of its products.",
+   "p2552": "Anthropic faces other routine legal disputes too, and because outcomes are unpredictable and many losses cannot be estimated, actual costs could exceed the amounts it has set aside and materially hurt its financial results."
+  },
+  "tldr": "Anthropic agreed to pay $1.5B to settle an August 2024 authors' lawsuit over books used to train Claude; the court approved it in July 2026, Anthropic paid $300 million in 2025 and owed $1.2B as of June 30, 2026, and some authors and publishers opted out to sue separately. Other copyright fights include song lyric suits by music publishers (Concord since October 2023, and 2026 federal suits by Universal, Sony and Warner Chappell naming two executives), four Canadian cases, and Reddit's suit over its data. Anthropic also faces misleading advertising class actions, growing content complaints, Federal Trade Commission and state inquiries, and warns losses could exceed amounts set aside."
+ }
+}
