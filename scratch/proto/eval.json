@@ -1,0 +1,179 @@
+{
+ "about": "Queries for the relevance page's search. Each lists the sections of reader/s1.json that answer it, best first; a query counts as found at the rank of the first of them among the search's sections. The answers were picked by reading the filing, not from the search's results. Run it at relevance.html?eval. A few answers were added after the first run, where reading the sections it ranked high showed they answer the query too; each such query says so in its note.",
+ "queries": [
+  {
+   "q": "how much did they spend in training compute",
+   "answers": [
+    "s175",
+    "s186",
+    "s598",
+    "s141",
+    "s561"
+   ],
+   "note": "Training compute is in research and development's compute and infrastructure costs (MD&A operating expenses, and the supplemental expense note)."
+  },
+  {
+   "q": "what happens if the power grid goes down",
+   "answers": [
+    "s40",
+    "s39",
+    "s81",
+    "s77"
+   ]
+  },
+  {
+   "q": "what if power prices go up",
+   "answers": [
+    "s39"
+   ]
+  },
+  {
+   "q": "what is the valuation of the company",
+   "answers": [
+    "s252",
+    "s227",
+    "s168",
+    "s180",
+    "s222"
+   ],
+   "note": "The offering price is still blank in this filing; the board's common stock valuations and the enterprise valuation behind the convertible note charges are the closest it comes."
+  },
+  {
+   "q": "how much revenue did they make last year",
+   "answers": [
+    "s184",
+    "s29",
+    "s171",
+    "s577",
+    "s160"
+   ]
+  },
+  {
+   "q": "can the founders be outvoted",
+   "answers": [
+    "s114",
+    "s20",
+    "s348"
+   ]
+  },
+  {
+   "q": "what is the Long-Term Benefit Trust",
+   "answers": [
+    "s19",
+    "s343",
+    "s549",
+    "s114"
+   ]
+  },
+  {
+   "q": "will they pay dividends",
+   "answers": [
+    "s134",
+    "s129",
+    "s449",
+    "s618"
+   ]
+  },
+  {
+   "q": "who are their biggest customers",
+   "answers": [
+    "s55",
+    "s146",
+    "s306",
+    "s543"
+   ]
+  },
+  {
+   "q": "are they being sued for copyright",
+   "answers": [
+    "s338",
+    "s85",
+    "s339",
+    "s636",
+    "s91"
+   ],
+   "note": "s339, s636 and s91 were added after the first run ranked them high: they describe the copyright suits (Bartz) and IP claims."
+  },
+  {
+   "q": "who are their competitors",
+   "answers": [
+    "s327",
+    "s44"
+   ]
+  },
+  {
+   "q": "how much is the CEO paid",
+   "answers": [
+    "s401",
+    "s376",
+    "s385",
+    "s403",
+    "s386"
+   ],
+   "note": "s403 and s386 were added after the first run: s403 gives the co-founders' and CEO's base salaries."
+  },
+  {
+   "q": "when can insiders sell their shares",
+   "answers": [
+    "s482",
+    "s497"
+   ]
+  },
+  {
+   "q": "export controls on chips to China",
+   "answers": [
+    "s100",
+    "s335"
+   ]
+  },
+  {
+   "q": "how much cash do they have",
+   "answers": [
+    "s30",
+    "s227",
+    "s135",
+    "s592",
+    "s581"
+   ],
+   "note": "s592 and s581 were added after the first run: the notes' cash and short-term investment tables."
+  },
+  {
+   "q": "what happens if a model goes rogue",
+   "answers": [
+    "s49",
+    "s48"
+   ]
+  },
+  {
+   "q": "Chinese state-sponsored hackers used Claude Code",
+   "answers": [
+    "s48"
+   ]
+  },
+  {
+   "q": "what does being a public benefit corporation mean for shareholders",
+   "answers": [
+    "s117",
+    "s18",
+    "s342",
+    "s119"
+   ]
+  },
+  {
+   "q": "what is Class N common stock",
+   "answers": [
+    "s483",
+    "s126",
+    "s447"
+   ]
+  },
+  {
+   "q": "what stock exchange will it trade on",
+   "answers": [
+    "s123",
+    "s1",
+    "s480"
+   ]
+  }
+ ]
+}

@@ -305,6 +305,27 @@ async function search(text, jump) {
   if (jump) stepMatch(1);
   else { renderSections(); renderTop(); }
 }
+// relevance.html?eval: runs every query in eval.json and shows, in the top panel, the rank among the
+// search's sections of the first section that answers it
+async function runEval() {
+  const { queries } = await fetch('eval.json').then(r => r.json());
+  const rows = [];
+  for (const { q, answers } of queries) {
+    await search(q);
+    const ranked = [...Q.secs.keys()].sort((a, b) => Q.secs.get(a) - Q.secs.get(b));
+    const at = ranked.findIndex(id => answers.includes(id));
+    rows.push({ q, rank: at < 0 ? null : at + 1, got: ranked.slice(0, 3).map(id => NODES[id].title.slice(0, 40)).join(' · ') });
+  }
+  const share = k => rows.filter(r => r.rank && r.rank <= k).length;
+  const mrr = rows.reduce((t, r) => t + (r.rank ? 1 / r.rank : 0), 0) / rows.length;
+  const summary = `${rows.length} queries · found at #1: ${share(1)} · in the top 3: ${share(3)} · at all: ${share(99)} · MRR ${mrr.toFixed(2)}`;
+  console.log(summary); console.table(rows);
+  $('topPath').textContent = 'Search eval (eval.json)';
+  $('topText').innerHTML = `<div>${summary}</div><table style="font-size:13px;border-collapse:collapse;margin-top:8px">` +
+    rows.map(r => `<tr><td style="padding:2px 12px 2px 0">${r.rank ? '#' + r.rank : '—'}</td><td style="padding-right:12px">${esc(r.q)}</td><td style="opacity:.5">${esc(r.got)}</td></tr>`).join('') + '</table>';
+  $('hits').style.display = 'none';
+  window.EVAL = { summary, rows };
+}
 let qTimer;
 $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => search($('q').value), 350); });
 
@@ -456,7 +477,7 @@ addEventListener('resize', () => sel && renderRelated());
   requestAnimationFrame(() => requestAnimationFrame(() => $('related').classList.remove('still')));
   $('sections').querySelector('.s.sel')?.scrollIntoView({ block: 'center' });
   window.dbg = { search, stepMatch, get Q() { return Q; }, NODES, ORDER };   // for checking from the console
-  loadEngine().catch(e => { $('qn').textContent = `search failed to load: ${e.message}`; throw e; });
+  loadEngine().then(() => location.search === '?eval' && runEval()).catch(e => { $('qn').textContent = `search failed to load: ${e.message}`; throw e; });
 })();
 </script>
 </body>
